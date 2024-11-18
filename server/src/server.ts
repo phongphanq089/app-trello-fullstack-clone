@@ -5,6 +5,7 @@ import exitHook from 'async-exit-hook'
 import { applySecurityMiddlewares } from './config/security'
 import databaseService from './config/mongoDb'
 import { API_V1 } from './routes/v1'
+import { defaultErrorHandle } from './middlewares/errors.middlewares'
 
 const app = express()
 
@@ -35,6 +36,8 @@ const startDatabase = async () => {
   }
 
   app.use('/v1', API_V1)
+
+  app.use(defaultErrorHandle)
 
   exitHook(() => {
     console.log('exiting 2')
