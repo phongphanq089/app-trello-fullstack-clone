@@ -1,5 +1,6 @@
-import { Db, MongoClient } from 'mongodb'
+import { Collection, Db, MongoClient } from 'mongodb'
 import envSetting from './envSetting'
+import { BoardType } from '~/types/Boards'
 
 const uri = `mongodb+srv://${envSetting.dbUsername}:${envSetting.dbPassword}@phong-phan-trello.dqr6pri.mongodb.net/?retryWrites=true&w=majority&appName=phong-phan-trello`
 
@@ -21,6 +22,10 @@ class DatabaseService {
   }
   async closeDb() {
     await this.client.close()
+  }
+
+  get board(): Collection<BoardType> {
+    return this.db.collection('boards' as string)
   }
 }
 
