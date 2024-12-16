@@ -19,16 +19,16 @@ applySecurityMiddlewares({ app, isProduction, envSetting })
 const startDatabase = async () => {
   if (isProduction) {
     httpServer.listen(process.env.PORT, () => {
-      console.log(`Hello ${envSetting.dbUsername}, I am running at ${process.env.PORT}`)
+      console.log(`Hello ${envSetting.DB_USERNAME}, I am running at ${process.env.PORT}`)
     })
   } else {
     httpServer
-      .listen(envSetting.port, () => {
-        console.log(`Hello ${envSetting.dbUsername}, I am running at ${envSetting.port}`)
+      .listen(envSetting.PORT, () => {
+        console.log(`Hello ${envSetting.DB_USERNAME}, I am running at ${envSetting.PORT}`)
       })
       .on('error', (err: any) => {
         if (err.code === 'EADDRINUSE') {
-          console.error(`Port ${envSetting.port} is already in use. Please use another port.`)
+          console.error(`Port ${envSetting.PORT} is already in use. Please use another port.`)
         } else {
           console.error(`Error occurred: ${err.message}`)
         }
@@ -40,7 +40,6 @@ const startDatabase = async () => {
   app.use(defaultErrorHandle)
 
   exitHook(() => {
-    console.log('exiting 2')
     databaseService.closeDb()
   })
 }

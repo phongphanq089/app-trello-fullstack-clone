@@ -9,3 +9,10 @@ export const stringToSlug = (val: string) => {
     .replace(/\s+/g, '-') // replace spaces with hyphens
     .replace(/-+/g, '-') // remove consecutive hyphens
 }
+
+export function handleError(error: unknown): Error {
+  if (error instanceof Error) {
+    return new Error(error.message)
+  }
+  return new Error('Unknown error occurred')
+}

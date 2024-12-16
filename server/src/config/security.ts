@@ -9,7 +9,7 @@ interface Options {
   app: Express
   isProduction: boolean
   envSetting: {
-    clientUrl?: string
+    CLIENT_URL?: string
   }
 }
 
@@ -22,8 +22,9 @@ export const applySecurityMiddlewares = ({ app, isProduction, envSetting }: Opti
   })
 
   const corsOptions: CorsOptions = {
-    origin: isProduction ? envSetting.clientUrl : '*',
+    origin: isProduction ? envSetting.CLIENT_URL : '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Chỉ cho phép các method cụ thể nếu cần
+    optionsSuccessStatus: 200,
     credentials: true // Nếu muốn cho phép chia sẻ cookie giữa client và server
   }
   app.use(cors(corsOptions))

@@ -22,5 +22,6 @@ export const boardValidation = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').allow(null, Date.now),
   _destroy: Joi.boolean().default(false).messages({
     'boolean.base': '"_destroy" must be a boolean value'
-  })
+  }),
+  type: Joi.string().valid('public', 'private').required()
 })

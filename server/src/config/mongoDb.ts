@@ -2,14 +2,14 @@ import { Collection, Db, MongoClient } from 'mongodb'
 import envSetting from './envSetting'
 import { BoardType } from '~/types/Boards'
 
-const uri = `mongodb+srv://${envSetting.dbUsername}:${envSetting.dbPassword}@phong-phan-trello.dqr6pri.mongodb.net/?retryWrites=true&w=majority&appName=phong-phan-trello`
+const uri = `mongodb+srv://${envSetting.DB_USERNAME}:${envSetting.DB_PASSWORD}@phong-phan-trello.dqr6pri.mongodb.net/?retryWrites=true&w=majority&appName=phong-phan-trello`
 
 class DatabaseService {
   private client: MongoClient
   private db: Db
   constructor() {
     this.client = new MongoClient(uri)
-    this.db = this.client.db(envSetting.dbName)
+    this.db = this.client.db(envSetting.DB_NAME)
   }
   async connect() {
     try {
@@ -25,7 +25,7 @@ class DatabaseService {
   }
 
   get board(): Collection<BoardType> {
-    return this.db.collection('boards' as string)
+    return this.db.collection(envSetting.DB_BOARD_COLLECTION as string)
   }
 }
 

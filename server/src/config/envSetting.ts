@@ -38,16 +38,20 @@ export const isProduction = envConfig === 'production'
 const PORT = process.env.PORT || process.env.APP_PORT || 3000
 
 export const envSetting = {
-  port: PORT,
-  dbName: process.env.DB_NAME,
-  dbPassword: process.env.DB_PASSWORD,
-  dbUsername: process.env.DB_USERNAME,
+  PORT: PORT,
+  DB_NAME: process.env.DB_NAME,
+  DB_PASSWORD: process.env.DB_PASSWORD,
+  DB_USERNAME: process.env.DB_USERNAME,
   dbUserCollection: process.env.DB_USER_COLLECTION,
   dbRefreshTokenCollection: process.env.DB_REFRESH_TOKENS_COLLECTION,
-  clientUrl: process.env.CLIENT_URL,
+  CLIENT_URL: process.env.CLIENT_URL,
   //==== DOMAIN ======//
   websiteDomainDeveloper: process.env.WEBSITE_DOMMAIN_DEVLEOPER,
   websiteDomainProduction: process.env.WEBSITE_DOMMAIN_PRODUCTION,
+  // ====== DB NAME COLLECTION ======= //
+  DB_BOARD_COLLECTION: process.env.DB_BOARD_COLLECTION,
+  DB_CARDS_COLLECTION: process.env.DB_CARDS_COLLECTION,
+  DB_COLUMNS_COLLECTION: process.env.DB_COLUMNS_COLLECTION,
   // ===== JWT Authentication ===== //
   passwordSecret: process.env.PASSWORD_SECRET,
   jwtSecret: process.env.JWT_SECRET,
@@ -63,6 +67,6 @@ export const envSetting = {
   // ==== KEY EMAIL CONFIG ====//
   brevoApiKey: process.env.BREVO_API_KEY,
   adminEmailAddess: process.env.ADMIN_EMAIL_ADDRESS,
-  adminEmailName: process.env.ADMIN_EMAIL_NAME
+  ADMIN_EMAIL_NAME: process.env.ADMIN_EMAIL_NAME
 }
 export default envSetting

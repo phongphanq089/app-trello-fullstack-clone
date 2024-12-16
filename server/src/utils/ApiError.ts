@@ -3,6 +3,7 @@ type ErrorDetails = Record<string, any> | string[] | null
 class ApiError extends Error {
   public statusCode: number
   public details: ErrorDetails
+  public isJoi?: boolean
 
   constructor(statusCode: number, message: string, details: any = null) {
     super(message)

@@ -1,14 +1,15 @@
 import express from 'express'
-import { boardController } from '~/controllers/board.controller'
+import { createBoardController, getDetailBoardController } from '~/controllers/board.controller'
 import validateRequest from '~/utils/validateRequest'
 import { wrapRequesHandler } from '~/utils/wrapRequestHandler'
-import { boardValidation } from '~/validations/board.validations'
+import { boardValidation } from '~/models/schema/board.validations'
 
 const Router = express.Router()
 Router.route('/')
   .get((req, res) => {
     res.status(200).json({ message: 'Boards API' })
   })
-  .post(validateRequest(boardValidation), wrapRequesHandler(boardController))
+  .post(validateRequest(boardValidation), wrapRequesHandler(createBoardController))
 
+Router.route('/:id').get(wrapRequesHandler(getDetailBoardController))
 export const boardRouter = Router
