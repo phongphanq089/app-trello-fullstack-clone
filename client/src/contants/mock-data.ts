@@ -1,4 +1,4 @@
-export const mockData = {
+export const MOC_DATA = {
   board: {
     _id: 'board-id-01',
     title: 'TrungQuanDev MERN Stack Board',
