@@ -9,3 +9,11 @@ export interface Cards {
   comments: string[]
   attachments: string[] | never[]
 }
+
+export interface Columns {
+  _id: string
+  boardId: string
+  title: string
+  cardOrderIds: string[]
+  cards: Cards[]
+}
