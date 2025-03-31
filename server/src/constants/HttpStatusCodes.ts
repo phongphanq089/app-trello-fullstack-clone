@@ -1,4 +1,4 @@
-const HttpStatusCodes = {
+const HTTTP_STATUS_CODE = {
   // Informational responses (100–199)
   INFORMATIONAL: {
     CONTINUE: 100, // Request received, continue process.
@@ -81,4 +81,4 @@ const HttpStatusCodes = {
   }
 }
 
-export default HttpStatusCodes
+export default HTTTP_STATUS_CODE

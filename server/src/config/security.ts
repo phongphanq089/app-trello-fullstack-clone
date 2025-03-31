@@ -8,12 +8,12 @@ import morgan from 'morgan'
 interface Options {
   app: Express
   isProduction: boolean
-  envSetting: {
-    clientUrl?: string
+  ENV_SETTING: {
+    CLIENT_URL?: string
   }
 }
 
-export const applySecurityMiddlewares = ({ app, isProduction, envSetting }: Options) => {
+export const applySecurityMiddlewares = ({ app, isProduction, ENV_SETTING }: Options) => {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Giới hạn mỗi IP được gửi tối đa 100 yêu cầu trong 15 phút
@@ -22,7 +22,7 @@ export const applySecurityMiddlewares = ({ app, isProduction, envSetting }: Opti
   })
 
   const corsOptions: CorsOptions = {
-    origin: isProduction ? envSetting.clientUrl : '*',
+    origin: isProduction ? ENV_SETTING.CLIENT_URL : '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Chỉ cho phép các method cụ thể nếu cần
     credentials: true // Nếu muốn cho phép chia sẻ cookie giữa client và server
   }
@@ -30,5 +30,5 @@ export const applySecurityMiddlewares = ({ app, isProduction, envSetting }: Opti
   app.use(limiter)
   app.use(helmet())
   app.use(compression()) // Nén các response để giảm băng thông
-  app.use(morgan('combined')) // Log các request đến
+  app.use(morgan(isProduction ? 'combined' : 'dev')) // Log các request đến
 }
