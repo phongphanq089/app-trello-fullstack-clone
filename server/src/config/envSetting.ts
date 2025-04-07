@@ -47,6 +47,8 @@ export const ENV_SETTING = {
   DB_USENAME: process.env.DB_USERNAME || '',
   DB_USER_COLLECTION: process.env.DB_USER_COLLECTION || '',
   CLIENT_URL: process.env.CLIENT_URL || '',
-  BOARD_NAME: process.env.BOARD_NAME || ''
+  BOARD_COLLECTION_NAME: process.env.BOARD_COLLECTION_NAME || '',
+  CARD_COLLECTION_NAME: process.env.CARD_COLLECTION_NAME || '',
+  COLUMN_COLLECTION_NAME: process.env.COLUMN_COLLECTION_NAME || ''
 }
 export default ENV_SETTING

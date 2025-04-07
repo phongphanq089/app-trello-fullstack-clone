@@ -3,8 +3,8 @@ import BoardContent from './components/BoardContent'
 
 const BoardPage = () => {
   return (
-    <ScrollArea className='w-full pb-8'>
-      <div className='w-full pl-4'>
+    <ScrollArea className='w-full pb-8 '>
+      <div className='w-full  pr-[200px]'>
         <BoardContent />
       </div>
       <ScrollBar orientation='horizontal' />

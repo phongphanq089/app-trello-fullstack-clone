@@ -1,6 +1,6 @@
 import DarkModeToogle from '../DarkModeToogle'
 import Logo from '../Logo'
-import MenuList from './MenuList'
+// import MenuList from './MenuList'
 import SearchModal from './SearchBar'
 import { Bell, CircleHelp, Filter, Globe, HardDrive, LayoutPanelLeft, UserPlus } from 'lucide-react'
 import UserMenu from './UserMenu'
@@ -10,20 +10,23 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 const Header = () => {
   return (
     <div className='w-full'>
-      <div className='flex justify-between items-center w-full bg-color-1 px-5 py-3'>
-        <div className='flex items-center gap-6'>
-          <Logo />
-          <MenuList />
-          <SearchModal />
-        </div>
+      <ScrollArea className='w-full whitespace-nowrap py-3 bg-color-1 '>
+        <div className='flex justify-between items-center w-full  px-5 '>
+          <div className='flex items-center gap-6'>
+            <Logo />
+            {/* <MenuList /> */}
+            <SearchModal />
+          </div>
 
-        <div className='flex items-center gap-5'>
-          <DarkModeToogle />
-          <Bell className='text-white cursor-pointer' />
-          <CircleHelp className='text-white cursor-pointer' />
-          <UserMenu />
+          <div className='flex items-center gap-5'>
+            <DarkModeToogle />
+            <Bell className='text-white cursor-pointer' />
+            <CircleHelp className='text-white cursor-pointer' />
+            <UserMenu />
+          </div>
         </div>
-      </div>
+        <ScrollBar orientation='horizontal' />
+      </ScrollArea>
 
       <ScrollArea className='w-full whitespace-nowrap py-5 mb-5 '>
         <div className='bg-transparent w-full flex justify-between gap-10 items-center px-5 pr-10 '>
