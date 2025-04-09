@@ -1,5 +1,5 @@
 import express from 'express'
-import HttpStatusCodes from '~/constants/HttpStatusCodes'
+
 import { validateRequest, wrapRequestHandler } from '~/middlewares/wrapRequestHandler'
 import {
   createBoardController,
@@ -12,18 +12,18 @@ import { BoardSchema } from '~/model/board.schema'
 
 const Router = express.Router()
 
-Router.get('/status', (req, res) =>
-  res.status(HttpStatusCodes.SUCCESS.OK).json({ message: 'API v1 are ready to be used' })
+Router.post('/createBoard', validateRequest(BoardSchema.createBoardSchema), wrapRequestHandler(createBoardController))
+
+Router.put('/updateBoard/:id', validateRequest(BoardSchema.updateBoard), wrapRequestHandler(updateBoardController))
+
+Router.get('/getBoard/:id', wrapRequestHandler(getBoardDetailController))
+
+Router.post(
+  '/createColumn',
+  validateRequest(BoardSchema.createColumnSchema),
+  wrapRequestHandler(createColumnController)
 )
 
-Router.post('/board', validateRequest(BoardSchema.createBoardSchema), wrapRequestHandler(createBoardController))
+Router.post('/createCard', validateRequest(BoardSchema.createCardSchema), wrapRequestHandler(createCardController))
 
-Router.put('/board/:id', validateRequest(BoardSchema.updateBoard), wrapRequestHandler(updateBoardController))
-
-Router.get('/board/:id', wrapRequestHandler(getBoardDetailController))
-
-Router.post('/column', validateRequest(BoardSchema.createColumnSchema), wrapRequestHandler(createColumnController))
-
-Router.post('/card', validateRequest(BoardSchema.createCardSchema), wrapRequestHandler(createCardController))
-
-export const API_V1 = Router
+export const boardRoute = Router

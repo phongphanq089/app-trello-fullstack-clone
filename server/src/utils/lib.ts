@@ -1,3 +1,6 @@
+import { pick } from 'lodash'
+import { UserRegistrationSchema } from '~/model/user.schema'
+
 export const generateSlug = (title: string): string => {
   return title
     .normalize('NFD') // Chuyển đổi sang dạng có dấu
@@ -7,4 +10,20 @@ export const generateSlug = (title: string): string => {
     .trim()
     .replace(/\s+/g, '-') // Thay thế khoảng trắng bằng '-'
     .replace(/-+/g, '-') // Loại bỏ các dấu '-' liên tiếp
+}
+
+export const pickUser = (user: any) => {
+  if (!user) return {}
+  return pick(user, [
+    '_id',
+    'username',
+    'email',
+    'displayName',
+    'avatar',
+    'role',
+    'isActive',
+    'verifyToken',
+    'createdAt',
+    'updatedAt'
+  ])
 }

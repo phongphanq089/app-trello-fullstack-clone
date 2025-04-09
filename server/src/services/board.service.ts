@@ -11,7 +11,12 @@ class BoardService {
   private getColection(name: string): Collection {
     return databaseService.getDb().collection(name)
   }
-
+  /**
+   * ! PRIVATE
+   * todo findOneById
+   * @param CreateBoardDto
+   * @returns
+   */
   private async findOneById(collectionName: string, id: string) {
     try {
       const colection = this.getColection(collectionName)
@@ -23,6 +28,12 @@ class BoardService {
     }
   }
 
+  /**
+   * ! PRIVATE
+   * todo pushColumnOrderIds
+   * @param CreateBoardDto
+   * @returns
+   */
   private async pushColumnOrderIds(column: any) {
     try {
       const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
@@ -41,7 +52,12 @@ class BoardService {
       throw new Error(error)
     }
   }
-
+  /**
+   * ! PRIVATE
+   * todo PUSH CARD ORDER IDS
+   * @param CreateBoardDto
+   * @returns
+   */
   private async pushCardOrderIds(card: any) {
     try {
       const colection = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
@@ -61,7 +77,11 @@ class BoardService {
       throw new Error(error)
     }
   }
-
+  /**
+   * todo CREATE BOARD
+   * @param CreateBoardDto
+   * @returns
+   */
   public async createBoard(data: CreateBoardDto): Promise<any> {
     try {
       const newBoard = { slug: generateSlug(data.title), ...data }
@@ -77,7 +97,12 @@ class BoardService {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
-
+  /**
+   * todo UPDATE BOARD
+   * @param id
+   * @param UpdateBoard
+   * @returns
+   */
   public async updateBoard(id: string, data: UpdateBoard): Promise<any> {
     const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
 
@@ -108,7 +133,11 @@ class BoardService {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
-
+  /**
+   * todo CREATE CLOUMN
+   * @param CreateColumnDto)
+   * @returns
+   */
   public async createColumn(data: CreateColumnDto): Promise<any> {
     try {
       const newColumn = { ...data, boardId: new ObjectId(data.boardId) }
@@ -131,6 +160,11 @@ class BoardService {
     }
   }
 
+  /**
+   * todo CREATE CARD
+   * @param CreateCardDto
+   * @returns
+   */
   public async createCard(data: CreateCardDto): Promise<any> {
     try {
       const newCard = { ...data, boardId: new ObjectId(data.boardId), columnId: new ObjectId(data.columnId) }
@@ -150,6 +184,11 @@ class BoardService {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
+  /**
+   * todo GET DETAIL BOARD
+   * @param id
+   * @returns
+   */
   public async getDetailBoard(id: string): Promise<any> {
     const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
     try {

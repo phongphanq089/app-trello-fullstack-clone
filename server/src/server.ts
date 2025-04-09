@@ -4,8 +4,8 @@ import { createServer } from 'http'
 import exitHook from 'async-exit-hook'
 import { applySecurityMiddlewares } from './config/security'
 import databaseService from './config/mongoDb'
-import { API_V1 } from './routes/v1/board.routes'
 import { errorHandler } from './middlewares/errorHandler'
+import { API_V1 } from './routes/v1'
 
 const app = express()
 
