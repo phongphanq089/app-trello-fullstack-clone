@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query'
 import http from '../http'
 
 const fetchBoard = async (boardId: string) => {
-  const ressponse = await http.get(`/board/${boardId}`)
+  const ressponse = await http.get(`/boards/getBoard/${boardId}`)
 
   return ressponse.data
 }
@@ -17,7 +17,7 @@ export const useGetBoard = (boardId: string) => {
 }
 
 const fetchCreateBoard = async (payload: { title: string; boardId: string }) => {
-  const response = await http.post(`/column`, { ...payload })
+  const response = await http.post(`/boards/createColumn`, { ...payload })
 
   return response.data
 }
@@ -29,7 +29,7 @@ export const useCreateBoard = () => {
 }
 
 const fetchCreateCard = async (payload: { title: string; boardId: string }) => {
-  const response = await http.post(`/card`, { ...payload })
+  const response = await http.post(`/boards/createBoard`, { ...payload })
 
   return response.data
 }

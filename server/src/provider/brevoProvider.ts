@@ -9,12 +9,18 @@ import juice from 'juice'
 let apiInstance = new TransactionalEmailsApi()
 
 apiInstance.setApiKey(TransactionalEmailsApiApiKeys.apiKey, ENV_SETTING.BREVO_API_KEY)
-// eslint-disable-next-line prefer-const
-let verifyEmailTemplate = fs.readFileSync(path.resolve('src/templates/template-mail.html'), 'utf8')
 
-const sendMail = async (recipientEmail: string, customSubject: string, templateData: Record<string, string>) => {
+const sendMail = async (
+  recipientEmail: string,
+  customSubject: string,
+  templateData: Record<string, string>,
+  urlFile: string
+) => {
+  const verifyEmailTemplate = fs.readFileSync(path.resolve(urlFile), 'utf8')
+
   const htmlContent = Mustache.render(verifyEmailTemplate, templateData)
 
+  // convert from style to inline style
   const inlineHtml = juice(htmlContent)
 
   // eslint-disable-next-line prefer-const

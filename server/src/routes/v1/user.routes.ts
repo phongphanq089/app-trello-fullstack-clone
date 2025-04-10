@@ -1,5 +1,12 @@
 import express from 'express'
-import { registerUserController, userLoginController, userVerifyAccountController } from '~/controllers/user.controller'
+import {
+  forgotPaswordController,
+  registerUserController,
+  resendForgotPasswordTokenController,
+  userLoginController,
+  userVerifyAccountController,
+  verifyForgotPasswordController
+} from '~/controllers/user.controller'
 import { validateRequest, wrapRequestHandler } from '~/middlewares/wrapRequestHandler'
 import { userSchema } from '~/model/user.schema'
 
@@ -14,5 +21,19 @@ Router.put(
 )
 
 Router.post('/login', validateRequest(userSchema.userLoginSchema), wrapRequestHandler(userLoginController))
+
+Router.post('/forgot-pasword', validateRequest(userSchema.forgotPassword), wrapRequestHandler(forgotPaswordController))
+
+Router.post(
+  '/verify-forgot-password',
+  validateRequest(userSchema.verifyForgotPassword),
+  wrapRequestHandler(verifyForgotPasswordController)
+)
+
+Router.post(
+  '/resend-forgot-password-token',
+  validateRequest(userSchema.resendForgotPasswordToken),
+  wrapRequestHandler(resendForgotPasswordTokenController)
+)
 
 export const boardUser = Router

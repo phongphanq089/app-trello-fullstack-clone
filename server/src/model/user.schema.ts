@@ -1,5 +1,4 @@
 import z from 'zod'
-import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/constants/setting'
 
 export class userSchema {
   public static userRegistrationSchema = z.object({
@@ -24,6 +23,9 @@ export class userSchema {
       .default('client'),
     isActive: z.boolean().nullable().optional().default(false),
     verifyToken: z.string().nullable().optional().default(null),
+    forgot_password_token: z.string().nullable().optional().default(null),
+    forgot_password_token_expired_at: z.string().nullable().optional().default(null),
+    verify_token_expired_at: z.string().nullable().optional().default(null),
     createdAt: z.number().default(() => Date.now()),
     updatedAt: z.number().nullable().default(null),
     _destroy: z.boolean().nullable().optional().default(false)
@@ -45,6 +47,33 @@ export class userSchema {
         message: 'Password must include at least one number or special character'
       })
   })
+  public static forgotPassword = z.object({
+    email: z.string().email({
+      message: 'email invalid address'
+    })
+  })
+  public static verifyForgotPassword = z.object({
+    email: z.string().email({
+      message: 'Please enter valid email address'
+    }),
+    token: z.string(),
+    password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .refine((password) => /[0-9!@#$%^&*(),.?":{}|<>]/.test(password), {
+        message: 'Password must include at least one number or special character'
+      })
+  })
+  public static resendForgotPasswordToken = z.object({
+    email: z.string().email({
+      message: 'Please enter valid email address'
+    })
+  })
+  public static resendVerifyEmailToken = z.object({
+    email: z.string().email({
+      message: 'Please enter valid email address'
+    })
+  })
 }
 
 export type UserRegistrationSchema = z.infer<typeof userSchema.userRegistrationSchema>
@@ -52,3 +81,11 @@ export type UserRegistrationSchema = z.infer<typeof userSchema.userRegistrationS
 export type UserVerifyAccountSchema = z.infer<typeof userSchema.userVerifyAccountSchema>
 
 export type UserLoginSchema = z.infer<typeof userSchema.userLoginSchema>
+
+export type ForgotPasswordSchema = z.infer<typeof userSchema.forgotPassword>
+
+export type VerifyForgotPassword = z.infer<typeof userSchema.verifyForgotPassword>
+
+export type ResendForgotPasswordToken = z.infer<typeof userSchema.resendForgotPasswordToken>
+
+export type ResendVerifyEmailToken = z.infer<typeof userSchema.resendVerifyEmailToken>

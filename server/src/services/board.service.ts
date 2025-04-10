@@ -8,7 +8,7 @@ import { CreateBoardDto, CreateCardDto, CreateColumnDto, UpdateBoard } from '~/m
 import { generateSlug } from '~/utils/lib'
 
 class BoardService {
-  private getColection(name: string): Collection {
+  getColection(name: string): Collection {
     return databaseService.getDb().collection(name)
   }
   /**
@@ -17,7 +17,7 @@ class BoardService {
    * @param CreateBoardDto
    * @returns
    */
-  private async findOneById(collectionName: string, id: string) {
+  async findOneById(collectionName: string, id: string) {
     try {
       const colection = this.getColection(collectionName)
       const result = await colection.findOne({ _id: new ObjectId(id) })
@@ -34,7 +34,7 @@ class BoardService {
    * @param CreateBoardDto
    * @returns
    */
-  private async pushColumnOrderIds(column: any) {
+  async pushColumnOrderIds(column: any) {
     try {
       const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
       const result = await colection.findOneAndUpdate(
@@ -58,7 +58,7 @@ class BoardService {
    * @param CreateBoardDto
    * @returns
    */
-  private async pushCardOrderIds(card: any) {
+  async pushCardOrderIds(card: any) {
     try {
       const colection = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
 
@@ -82,7 +82,7 @@ class BoardService {
    * @param CreateBoardDto
    * @returns
    */
-  public async createBoard(data: CreateBoardDto): Promise<any> {
+  async createBoard(data: CreateBoardDto): Promise<any> {
     try {
       const newBoard = { slug: generateSlug(data.title), ...data }
 
@@ -103,7 +103,7 @@ class BoardService {
    * @param UpdateBoard
    * @returns
    */
-  public async updateBoard(id: string, data: UpdateBoard): Promise<any> {
+  async updateBoard(id: string, data: UpdateBoard): Promise<any> {
     const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
 
     const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
@@ -138,7 +138,7 @@ class BoardService {
    * @param CreateColumnDto)
    * @returns
    */
-  public async createColumn(data: CreateColumnDto): Promise<any> {
+  async createColumn(data: CreateColumnDto): Promise<any> {
     try {
       const newColumn = { ...data, boardId: new ObjectId(data.boardId) }
 
@@ -165,7 +165,7 @@ class BoardService {
    * @param CreateCardDto
    * @returns
    */
-  public async createCard(data: CreateCardDto): Promise<any> {
+  async createCard(data: CreateCardDto): Promise<any> {
     try {
       const newCard = { ...data, boardId: new ObjectId(data.boardId), columnId: new ObjectId(data.columnId) }
 
@@ -189,7 +189,7 @@ class BoardService {
    * @param id
    * @returns
    */
-  public async getDetailBoard(id: string): Promise<any> {
+  async getDetailBoard(id: string): Promise<any> {
     const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
     try {
       const resultBoard = await colection
