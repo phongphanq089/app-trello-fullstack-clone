@@ -3,12 +3,13 @@ import { ColumnType } from '../../types.board'
 import ColumnBody from './ColumnBody'
 import ColumnHeader from './ColumnHeader'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { ACTIVE_DRAG_ITEM_TYPE } from '@/config/setting'
+
 import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
-import { useCreateCard } from '@/config/query/board'
+import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
+import { useCreateCard } from '@/services/query/board'
 
 interface PropsType {
   column: ColumnType
@@ -35,7 +36,7 @@ const Column: React.FC<PropsType> = ({ column, boardId, refetch }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value)
   }
-  console.log(isAddCardOpen)
+
   const handleAddCard = () => {
     setIsAddCardOpen(true)
   }

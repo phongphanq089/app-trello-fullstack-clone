@@ -1,3 +1,11 @@
+export const BOARD_MESSAGES = {
+  CREATE_BOARD_SUCCESS: 'Create board successfully',
+  UPDATE_BOARD_SUCCESS: 'Update board successfully',
+  CREATE_COLUMN_SUCCESS: 'Create column successfully',
+  CREATE_CARD_SUCCESS: 'Create card successfully',
+  GET_BOARD_DETAIL_SUCCESS: 'Get board detail successfully'
+}
+
 export const USER_MESSAGES = {
   VALIDATION_ERROR: 'Validation Erorr',
   NAME_IS_REQUIRED: 'Name is required',

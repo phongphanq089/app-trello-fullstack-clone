@@ -9,10 +9,11 @@ import {
   FloatingPanelTextarea,
   FloatingPanelTrigger
 } from '@/components/ui/FloatingPanel'
-import { useCreateBoard } from '@/config/query/board'
+import { useCreateBoard } from '@/services/query/board'
+
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { PackagePlus } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'react-toastify'
 
 const AddColumn = ({
   boardId,

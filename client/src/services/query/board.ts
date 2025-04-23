@@ -5,7 +5,7 @@ import http from '../http'
 const fetchBoard = async (boardId: string) => {
   const ressponse = await http.get(`/boards/getBoard/${boardId}`)
 
-  return ressponse.data
+  return ressponse.data.result
 }
 
 export const useGetBoard = (boardId: string) => {
@@ -29,7 +29,7 @@ export const useCreateBoard = () => {
 }
 
 const fetchCreateCard = async (payload: { title: string; boardId: string }) => {
-  const response = await http.post(`/boards/createBoard`, { ...payload })
+  const response = await http.post(`/boards/createCard`, { ...payload })
 
   return response.data
 }
@@ -37,5 +37,18 @@ const fetchCreateCard = async (payload: { title: string; boardId: string }) => {
 export const useCreateCard = () => {
   return useMutation({
     mutationFn: (payload: { title: string; boardId: string; columnId: string }) => fetchCreateCard(payload)
+  })
+}
+
+const fetchUpdateBoard = async (payload: { title: string; description: string; columnOrderIds: string[] }) => {
+  const id = '67f78e83fabfe0894a3089e1'
+  const response = await http.put(`/boards/updateBoard/${id}`, { ...payload })
+
+  return response.data
+}
+
+export const useUpdateBoard = () => {
+  return useMutation({
+    mutationFn: (payload: { title: string; description: string; columnOrderIds: string[] }) => fetchUpdateBoard(payload)
   })
 }

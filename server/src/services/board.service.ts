@@ -1,4 +1,3 @@
-import { AsyncLocalStorage } from 'async_hooks'
 import { Collection, ObjectId } from 'mongodb'
 import ENV_SETTING from '~/config/envSetting'
 import databaseService from '~/config/mongoDb'

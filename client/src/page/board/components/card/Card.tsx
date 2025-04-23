@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CardType } from '../../types.board'
 import { CSS } from '@dnd-kit/utilities'
-import { ACTIVE_DRAG_ITEM_TYPE } from '@/config/setting'
+import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
 
 interface CardProps {
   card: CardType

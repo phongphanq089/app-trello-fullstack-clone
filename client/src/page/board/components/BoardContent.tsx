@@ -12,16 +12,24 @@ import {
   useSensors
 } from '@dnd-kit/core'
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable'
-import { ACTIVE_DRAG_ITEM_TYPE } from '@/config/setting'
+
 import Card from './card/Card'
-import { useGetBoard } from '@/config/query/board'
+
 import LoaderUi from '@/components/shared/LoaderUi'
-import { Board, ColumnType } from '../types.board'
+import { Board, CardType, ColumnType } from '../types.board'
 import AddColumn from './form/AddColumn'
 
+import { useGetBoard, useUpdateBoard } from '@/services/query/board'
+import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
+import { toast } from 'react-toastify'
+
 const BoardContent = () => {
-  const id = '67ee406024d26505cc4386a1'
+  const id = '67f78e83fabfe0894a3089e1'
   const { data: getBoard, isLoading, refetch } = useGetBoard(id)
+
+  // const [] = useState()
+
+  const { mutate } = useUpdateBoard()
 
   const [boardData, setBoardData] = useState<Board | undefined>(undefined)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -56,6 +64,7 @@ const BoardContent = () => {
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
       handleColumnDrag(activeIdString, overIdString)
     } else if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.CARD) {
+      handleCardDrag(activeIdString, overIdString)
     }
     resetDragState()
   }
@@ -71,6 +80,20 @@ const BoardContent = () => {
     if (isActiveCloumn) {
       const newColumnOrder = arrayMove(boardData.columnOrderIds, oldIndex, newIndex)
 
+      const payload = {
+        title: 'This is a sample project 1',
+        description: 'This is a sample project board 1',
+        columnOrderIds: newColumnOrder
+      }
+      mutate(payload, {
+        onSuccess: () => {
+          refetch()
+        },
+        onError: (error) => {
+          toast.error(`Error creating column, ${error}`)
+        }
+      })
+
       const orderedColumns = mapOrder(boardData.columns, newColumnOrder, '_id')
 
       setBoardData({
@@ -79,6 +102,85 @@ const BoardContent = () => {
         columns: orderedColumns as ColumnType[]
       })
     }
+  }
+
+  const handleCardDrag = (activeId: string, overId: string) => {
+    if (!boardData) return
+    const activeColumn = boardData.columns.find((col) => col.cards.some((card) => card._id === activeId))
+
+    const overColumn = boardData.columns.find(
+      (col) => col.cards.some((card) => card._id === overId) || col._id === overId
+    )
+
+    if (!activeColumn || !overColumn) return
+
+    // Find the card currently being drag
+    const activeCard = activeColumn.cards.find((card) => card._id === activeId)
+
+    if (!activeCard) return
+
+    if (!activeColumn || !overColumn) return
+
+    if (activeColumn._id === overColumn._id) {
+      handleSameColumnDrag(activeColumn, activeId, overId)
+    } else {
+      handleDifferentColumnDrag(activeColumn, overColumn, activeCard, activeId, overId)
+    }
+  }
+
+  const handleSameColumnDrag = (column: ColumnType, activeId: string, overId: string) => {
+    const oldIndex = column.cardOrderIds.indexOf(activeId)
+    const newIndex = column.cardOrderIds.indexOf(overId)
+
+    if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
+      const newCardOrder = arrayMove(column.cardOrderIds, oldIndex, newIndex)
+      const orderedCards = mapOrder(column.cards as any, newCardOrder, '_id')
+      updateBoardData(column._id, newCardOrder, orderedCards as any)
+    }
+  }
+  const handleDifferentColumnDrag = (
+    activeColumn: ColumnType,
+    overColumn: ColumnType,
+    activeCard: CardType,
+    activeId: string,
+    overId: string
+  ) => {
+    if (!boardData) return
+    const newColumns = boardData.columns.map((col) => {
+      if (col._id === activeColumn._id) {
+        return {
+          ...col,
+          cardOrderIds: col.cardOrderIds.filter((id) => id !== activeId),
+          cards: col.cards.filter((card) => card._id !== activeId)
+        }
+      }
+      if (col._id === overColumn._id) {
+        const newCard = { ...activeCard, columnId: overColumn._id }
+        const overIndex = overId === overColumn._id ? 0 : col.cardOrderIds.indexOf(overId)
+
+        const newCardOrder = [...col.cardOrderIds.slice(0, overIndex), activeId, ...col.cardOrderIds.slice(overIndex)]
+
+        const orderedCards = mapOrder([...(col.cards as any), newCard], newCardOrder, '_id')
+
+        return {
+          ...col,
+          cardOrderIds: newCardOrder,
+          cards: orderedCards
+        }
+      }
+
+      return col
+    })
+
+    setBoardData({ ...boardData, columns: newColumns as any })
+  }
+
+  const updateBoardData = (columnId: string, newCardOrder: string[], orderedCards: CardType[]) => {
+    if (!boardData) return
+    const newColumns = boardData.columns.map((col) =>
+      col._id === columnId ? { ...col, cardOrderIds: newCardOrder, cards: orderedCards } : col
+    )
+    setBoardData({ ...boardData, columns: newColumns })
   }
 
   const resetDragState = () => {
