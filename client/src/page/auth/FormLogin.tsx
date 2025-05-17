@@ -10,19 +10,13 @@ import { Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
+import ResendEmail from './components/ResendEmail'
 
-interface RegisterUser {
-  PAYLOAD: {
-    email: string
-    password: string
-  }
-}
 export default function FormLogin() {
   const {
     handleSubmit,
     register,
-    control,
-    watch,
+    reset,
     formState: { errors }
   } = useForm<TypeLoginValidation>({
     resolver: zodResolver(loginValidation)
@@ -31,7 +25,11 @@ export default function FormLogin() {
   const { mutate: loginUser } = useLoginUser()
 
   const onSubmit = async (payload: TypeLoginValidation) => {
-    loginUser(payload)
+    loginUser(payload, {
+      onSuccess: () => {
+        reset()
+      }
+    })
   }
   return (
     <div className='relative z-10 flex flex-1 flex-col rounded-3xl border-white/50 border-t bg-white/60 px-4 py-10 backdrop-blur-2xl sm:justify-center md:flex-none md:px-20 lg:rounded-r-none lg:border-t-0 lg:border-l lg:py-24'>
@@ -90,8 +88,9 @@ export default function FormLogin() {
 
             <div className='col-span-full '>
               <Button type='submit' className='h-12 flex items-center justify-center w-full mt-5'>
-                Sign Up
+                Login
               </Button>
+              <ResendEmail />
             </div>
           </div>
           <div className='mt-6'>

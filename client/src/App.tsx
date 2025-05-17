@@ -5,6 +5,9 @@ import BoardLayout from './layout/BoardLayout'
 import LayoutAuth from './page/auth/LayoutAuth'
 import ProtectedRoute from './layout/ProtectedRoute'
 import LayoutAuthProtected from './layout/LayoutAuthProtected'
+import VerifyEmail from './page/auth/VerifyEmail'
+import ForgotPasswordPage from './page/auth/ForgotPasswordPage'
+import VerifyForgotPassword from './page/auth/VerifyForgotPassword'
 
 function App() {
   return (
@@ -12,6 +15,9 @@ function App() {
       <Route path='/auth' element={<LayoutAuthProtected />}>
         <Route path='login' element={<LayoutAuth />} />
         <Route path='register' element={<LayoutAuth />} />
+        <Route path='verify-email' element={<VerifyEmail />} />
+        <Route path='forgot-password' element={<ForgotPasswordPage />} />
+        <Route path='verify-forgot-password' element={<VerifyForgotPassword />} />
       </Route>
 
       <Route path='/' element={<ProtectedRoute />}>

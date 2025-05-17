@@ -6,10 +6,18 @@ import { applySecurityMiddlewares } from './config/security'
 import databaseService from './config/mongoDb'
 import { errorHandler } from './middlewares/errorHandler'
 import { API_V1 } from './routes/v1'
+import cookieParser from 'cookie-parser'
 
 const app = express()
 
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store')
+  next()
+})
+
 const httpServer = createServer(app)
+
+// app.use(cookieParser())
 
 app.use(express.json()) // Middleware để parse body JSON
 app.use(express.urlencoded({ extended: true })) // Middleware để parse body từ form

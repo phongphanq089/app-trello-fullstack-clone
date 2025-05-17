@@ -2,7 +2,15 @@ import { Request, Response } from 'express'
 import { cloneDeep, result } from 'lodash'
 import HTTTP_STATUS_CODE from '~/constants/HttpStatusCodes'
 import { BOARD_MESSAGES } from '~/constants/messages'
-import { CreateBoardDto, CreateCardDto, CreateColumnDto, UpdateBoard } from '~/model/board.schema'
+import {
+  CreateBoardDto,
+  CreateCardDto,
+  CreateColumnDto,
+  MoveCardDifferentColumn,
+  RemoveColumnSchema,
+  UpdateBoard,
+  UpdateColumn
+} from '~/model/board.schema'
 import { boardService } from '~/services/board.service'
 
 export const createBoardController = async (req: Request<any, any, CreateBoardDto>, res: Response) => {
@@ -22,11 +30,38 @@ export const updateBoardController = async (req: Request<any, any, UpdateBoard>,
   })
 }
 
+export const moveCardDifferentColumnController = async (
+  req: Request<any, any, MoveCardDifferentColumn>,
+  res: Response
+) => {
+  const result = await boardService.moveCardDifferentColumn(req.body)
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: 'Update card successfulled',
+    result: result
+  })
+}
+
 export const createColumnController = async (req: Request<any, any, CreateColumnDto>, res: Response) => {
   const result = await boardService.createColumn(req.body)
   return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
     message: BOARD_MESSAGES.CREATE_COLUMN_SUCCESS,
     result: result
+  })
+}
+
+export const updateColumnController = async (req: Request<any, any, UpdateColumn>, res: Response) => {
+  const cloumnId = req.params.id as string
+  const result = await boardService.updateColumn(cloumnId, req.body)
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: 'Update column successfull',
+    result: result
+  })
+}
+export const removeColumnController = async (req: Request<any, any, RemoveColumnSchema>, res: Response) => {
+  const cloumnId = req.params.id
+  const result = await boardService.removeColumn(cloumnId)
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: result
   })
 }
 

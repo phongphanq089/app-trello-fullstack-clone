@@ -6,6 +6,7 @@ import { AppError } from '~/middlewares/errorHandler'
 import {
   ForgotPasswordSchema,
   ResendForgotPasswordToken,
+  ResendVerifyEmailToken,
   UserLoginSchema,
   UserRegistrationSchema,
   UserVerifyAccountSchema,
@@ -23,9 +24,7 @@ class UserService {
     return databaseService.getDb().collection(name)
   }
   /**
-   * todo checkEmailExit
-   * @param email
-   * @returns
+   *@CHECK_EMAIL_EXIT
    */
   private async checkExitEmail(email: string) {
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
@@ -33,10 +32,7 @@ class UserService {
     return isExitEmail
   }
   /**
-   * ! PRIVATE
-   * todo findOneById
-   * @param CreateBoardDto
-   * @returns
+   *@FIND_ONE_BY_ID
    */
   private async findOneById(collectionName: string, id: string) {
     try {
@@ -49,10 +45,23 @@ class UserService {
     }
   }
   /**
-   * todo UPDATE BOARD
-   * @param id
-   * @param isActive: true | verifyToken: null
-   * @returns
+   *@CREATE_USER
+   */
+  async createUser(data: UserRegistrationSchema): Promise<any> {
+    try {
+      const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
+
+      const result = await colection.insertOne({ ...data })
+
+      const resultNewBoard = await this.findOneById(ENV_SETTING.USER_COLLECTION_NAME, result.insertedId.toString())
+
+      return resultNewBoard
+    } catch (error) {
+      throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
+    }
+  }
+  /**
+   *@UPDATE_USER
    */
   async updateUser(
     id: string,
@@ -65,6 +74,7 @@ class UserService {
     const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
 
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
+
     try {
       const updateData = {
         ...data,
@@ -82,37 +92,19 @@ class UserService {
           _id: new ObjectId(id)
         },
         {
-          $set: updateData,
-          $currentDate: {
-            updatedAt: true
-          }
+          $set: updateData
         },
-
         { returnDocument: 'after' }
       )
+
       return result
     } catch (error) {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
   /**
-   * todo CREATE USER
-   * @param UserRegistrationSchema
-   * @returns
+   *@REGISTER_USER
    */
-  async createUser(data: UserRegistrationSchema): Promise<any> {
-    try {
-      const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
-
-      const result = await colection.insertOne({ ...data })
-
-      const resultNewBoard = await this.findOneById(ENV_SETTING.USER_COLLECTION_NAME, result.insertedId.toString())
-
-      return resultNewBoard
-    } catch (error) {
-      throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
-    }
-  }
   async registerUser(resBody: UserRegistrationSchema) {
     const exitUser = await this.checkExitEmail(resBody.email)
 
@@ -138,7 +130,7 @@ class UserService {
       {
         name: 'Nguyễn Văn A',
         companyName: 'Trello Clone',
-        verifyLink: `https://example.com/confirm?token=${resultNewUser.verifyToken}`,
+        verifyLink: `${ENV_SETTING.WEBSITE_DOMAIN_DEVELOPER}/auth/verify-email?email=${resBody.email}&token=${resultNewUser.verifyToken}`,
         logoUrl: 'https://trungquandev.com/wp-content/uploads/2020/08/logo-trungquandev-white-bg.jpg',
         year: `${new Date().getFullYear()}`
       },
@@ -148,9 +140,7 @@ class UserService {
     return pickUser(resultNewUser)
   }
   /**
-   * todo verifyAccount
-   * @param UserVerifyAccountSchema
-   * @returns
+   *@VERIFY_ACCOUNT
    */
   async verifyAccount(resBody: UserVerifyAccountSchema) {
     const existUser = await this.checkExitEmail(resBody.email)
@@ -158,12 +148,15 @@ class UserService {
     if (!existUser) {
       throw new AppError('Account not found', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
     }
+
     if (existUser.isActive) {
-      throw new AppError('Your account is already active !', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
+      throw new AppError('Your account is already active!', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
     }
+
     if (resBody.token !== existUser.verifyToken) {
       throw new AppError('Token is invalid!', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
     }
+
     const updateData = {
       isActive: true,
       verifyToken: null
@@ -173,9 +166,7 @@ class UserService {
     return pickUser(updateUser)
   }
   /**
-   * todo Login
-   * @param serLoginSchema
-   * @returns
+   *@LOGIN_ACCOUNT
    */
   async Login(resBody: UserLoginSchema) {
     const existUser = await this.checkExitEmail(resBody.email)
@@ -184,7 +175,10 @@ class UserService {
       throw new AppError('Account not found', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
     }
     if (!existUser.isActive) {
-      throw new AppError('Your account is currently inactive.', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
+      throw new AppError(
+        'Please check and verify your account before logging in!',
+        HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE
+      )
     }
     if (!bcrypt.compareSync(resBody.password, existUser.password)) {
       throw new AppError('Your email or password is incorrect !', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
@@ -211,9 +205,7 @@ class UserService {
     return { accessToken, refreshToken, ...pickUser(existUser) }
   }
   /**
-   * todo Forgot Password
-   * @param ForgotPasswordSchema
-   * @returns
+   *@FORGOT_PASSWORD
    */
   async forgotPassWord(resBody: ForgotPasswordSchema) {
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
@@ -246,7 +238,7 @@ class UserService {
       {
         name: 'Nguyễn Văn A',
         companyName: 'Trello Clone',
-        verifyLink: `https://example.com/confirm?email=${existUser.email}&token=${ForgotPasswordToken}`,
+        verifyLink: `${resBody.urlRedirect}?email=${existUser.email}&token=${ForgotPasswordToken}`,
         logoUrl: 'https://trungquandev.com/wp-content/uploads/2020/08/logo-trungquandev-white-bg.jpg',
         year: `${new Date().getFullYear()}`
       },
@@ -258,9 +250,7 @@ class UserService {
     }
   }
   /**
-   * todo Verify Forgot Password
-   * @param VerifyForgotPassword
-   * @returns
+   *@VERIFY_FORGOT_PASSWORD
    */
   async verifyForgotPassword(resBody: VerifyForgotPassword) {
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
@@ -297,9 +287,7 @@ class UserService {
     }
   }
   /**
-   * todo resendForgotPasswordToken
-   * @param resendForgotPasswordToken
-   * @returns
+   *@RESEND_FORGOT_PASSWORD_TOKEN
    */
   async resendForgotPasswordToken(resBody: ResendForgotPasswordToken) {
     const existUser = await this.checkExitEmail(resBody.email)
@@ -332,11 +320,39 @@ class UserService {
       {
         name: existUser.displayName || 'User',
         companyName: 'Trello Clone',
-        verifyLink: `https://example.com/reset-password?email=${resBody.email}&token=${newToken}`,
+        verifyLink: `${resBody.urlRedirect}?email=${resBody.email}&token=${newToken}`,
         logoUrl: 'https://trungquandev.com/wp-content/uploads/2020/08/logo-trungquandev-white-bg.jpg',
         year: `${new Date().getFullYear()}`
       },
       'src/templates/forgot-password.html'
+    )
+
+    return { message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS }
+  }
+  /**
+   *@RESEND_EMAIL
+   */
+  async resendEmail(resBody: ResendVerifyEmailToken) {
+    const existUser = await this.checkExitEmail(resBody.email)
+
+    if (!existUser) {
+      throw new AppError('Account not found', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
+    }
+    if (existUser.isActive) {
+      throw new AppError('Your email has been verified', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
+    }
+
+    await BrevoProvider.sendMail(
+      resBody.email,
+      'Trello MERN stack advanced : please your email before using our services',
+      {
+        name: 'Nguyễn Văn A',
+        companyName: 'Trello Clone',
+        verifyLink: `${ENV_SETTING.WEBSITE_DOMAIN_DEVELOPER}/auth/verify-email?email=${resBody.email}&token=${existUser.verifyToken}`,
+        logoUrl: 'https://trungquandev.com/wp-content/uploads/2020/08/logo-trungquandev-white-bg.jpg',
+        year: `${new Date().getFullYear()}`
+      },
+      'src/templates/template-mail.html'
     )
 
     return { message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS }

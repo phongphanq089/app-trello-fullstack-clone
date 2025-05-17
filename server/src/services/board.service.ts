@@ -1,9 +1,17 @@
+import { STATUS_CODES } from 'http'
 import { Collection, ObjectId } from 'mongodb'
 import ENV_SETTING from '~/config/envSetting'
 import databaseService from '~/config/mongoDb'
 import HTTTP_STATUS_CODE from '~/constants/HttpStatusCodes'
 import { AppError } from '~/middlewares/errorHandler'
-import { CreateBoardDto, CreateCardDto, CreateColumnDto, UpdateBoard } from '~/model/board.schema'
+import {
+  CreateBoardDto,
+  CreateCardDto,
+  CreateColumnDto,
+  MoveCardDifferentColumn,
+  UpdateBoard,
+  UpdateColumn
+} from '~/model/board.schema'
 import { generateSlug } from '~/utils/lib'
 
 class BoardService {
@@ -11,12 +19,9 @@ class BoardService {
     return databaseService.getDb().collection(name)
   }
   /**
-   * ! PRIVATE
-   * todo findOneById
-   * @param CreateBoardDto
-   * @returns
+   *@FIND_ONE_BUY_ID
    */
-  async findOneById(collectionName: string, id: string) {
+  private async findOneById(collectionName: string, id: string) {
     try {
       const colection = this.getColection(collectionName)
       const result = await colection.findOne({ _id: new ObjectId(id) })
@@ -28,12 +33,9 @@ class BoardService {
   }
 
   /**
-   * ! PRIVATE
-   * todo pushColumnOrderIds
-   * @param CreateBoardDto
-   * @returns
+   *@PUSH_COLUMN_ORDERIDS
    */
-  async pushColumnOrderIds(column: any) {
+  private async pushColumnOrderIds(column: any) {
     try {
       const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
       const result = await colection.findOneAndUpdate(
@@ -52,12 +54,9 @@ class BoardService {
     }
   }
   /**
-   * ! PRIVATE
-   * todo PUSH CARD ORDER IDS
-   * @param CreateBoardDto
-   * @returns
+   *@PUSH_CARD_ORDERIDS
    */
-  async pushCardOrderIds(card: any) {
+  private async pushCardOrderIds(card: any) {
     try {
       const colection = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
 
@@ -77,11 +76,9 @@ class BoardService {
     }
   }
   /**
-   * todo CREATE BOARD
-   * @param CreateBoardDto
-   * @returns
+   *@CREATE_BOARD
    */
-  async createBoard(data: CreateBoardDto): Promise<any> {
+  async createBoard(data: CreateBoardDto) {
     try {
       const newBoard = { slug: generateSlug(data.title), ...data }
 
@@ -97,12 +94,9 @@ class BoardService {
     }
   }
   /**
-   * todo UPDATE BOARD
-   * @param id
-   * @param UpdateBoard
-   * @returns
+   *@UPDATE_BOARD
    */
-  async updateBoard(id: string, data: UpdateBoard): Promise<any> {
+  async updateBoard(id: string, data: UpdateBoard) {
     const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
 
     const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
@@ -110,6 +104,10 @@ class BoardService {
       const updateData = {
         ...data,
         updatedAt: Date.now()
+      }
+
+      if (updateData.columnOrderIds) {
+        updateData.columnOrderIds = updateData.columnOrderIds.map((id: any) => ObjectId.createFromHexString(id)) as any
       }
 
       Object.keys(updateData).forEach((fieldName) => {
@@ -133,9 +131,7 @@ class BoardService {
     }
   }
   /**
-   * todo CREATE CLOUMN
-   * @param CreateColumnDto)
-   * @returns
+   *@CREATE_COLUMN
    */
   async createColumn(data: CreateColumnDto): Promise<any> {
     try {
@@ -158,11 +154,145 @@ class BoardService {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
+  /**
+   * @UPDATE_COLUMN
+   */
+  async updateColumn(id: string, data: UpdateColumn) {
+    const INVALID_UPDATE_FIELDS = ['_id', 'boardId']
+
+    const colection = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
+
+    const updateData = {
+      ...data
+    }
+
+    try {
+      Object.keys(updateData).forEach((fieldName) => {
+        if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+          delete (updateData as Record<string, any>)[fieldName]
+        }
+      })
+
+      if (updateData.cardOrderIds) {
+        updateData.cardOrderIds = updateData.cardOrderIds.map((id) => new ObjectId(id)) as any
+      }
+
+      const result = await colection.findOneAndUpdate(
+        {
+          _id: new ObjectId(id)
+        },
+        {
+          $set: updateData
+        },
+        { returnDocument: 'after' }
+      )
+      return result
+    } catch (error) {
+      throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
+    }
+  }
+  /**
+   * @MOVE_CARD_DIFFERENT_COLUMN
+   */
+  async moveCardDifferentColumn(res: MoveCardDifferentColumn) {
+    const { prevColumnId, nextColumnId, prevCardOrderIds, nextCardOrderIds, currentCardId } = res
+
+    const prevColumnObjectId = new ObjectId(prevColumnId)
+    const nextColumnObjectId = new ObjectId(nextColumnId)
+    const currentCardObjectId = new ObjectId(currentCardId)
+
+    const INVALID_UPDATE_FIELDS = ['_id', 'boardId']
+    const colectionColumn = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
+
+    const colectionCard = this.getColection(ENV_SETTING.CARD_COLLECTION_NAME)
+
+    try {
+      const cleanRes = { ...res }
+      Object.keys(cleanRes).forEach((fieldName) => {
+        if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+          delete (cleanRes as Record<string, any>)[fieldName]
+        }
+      })
+
+      await Promise.all([
+        colectionColumn.findOneAndUpdate(
+          {
+            _id: prevColumnObjectId
+          },
+          {
+            $set: {
+              cardOrderIds: prevCardOrderIds
+            }
+          },
+          { returnDocument: 'after' }
+        ),
+        colectionColumn.findOneAndUpdate(
+          {
+            _id: nextColumnObjectId
+          },
+          {
+            $set: {
+              cardOrderIds: nextCardOrderIds
+            }
+          },
+          { returnDocument: 'after' }
+        )
+      ])
+
+      await colectionCard.findOneAndUpdate(
+        {
+          _id: currentCardObjectId
+        },
+        {
+          $set: {
+            columnId: nextColumnObjectId
+          }
+        },
+        { returnDocument: 'after' }
+      )
+      return { status: 'success', updatedCardId: currentCardId }
+    } catch (error) {
+      throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
+    }
+  }
 
   /**
-   * todo CREATE CARD
-   * @param CreateCardDto
-   * @returns
+   * @REMOVE_COLUMN
+   */
+  async removeColumn(id: string) {
+    const colectionColumn = this.getColection(ENV_SETTING.COLUMN_COLLECTION_NAME)
+    const colectionCard = this.getColection(ENV_SETTING.CARD_COLLECTION_NAME)
+    const colectionBoard = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
+
+    try {
+      const targetColumn = await this.findOneById(ENV_SETTING.COLUMN_COLLECTION_NAME, id)
+
+      if (!targetColumn) {
+        throw new AppError('Column not fount', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
+      }
+
+      await colectionColumn.deleteOne({
+        _id: new ObjectId(id)
+      })
+      await colectionCard.deleteMany({
+        columnId: new ObjectId(id)
+      })
+
+      await colectionBoard.findOneAndUpdate(
+        {
+          _id: ObjectId.createFromHexString(targetColumn.boardId)
+        },
+        { $pull: { columnOrderIds: new ObjectId(targetColumn._id) } } as any,
+        { returnDocument: 'after' }
+      )
+
+      return { removeColumn: 'Column removed successfulled' }
+    } catch (error) {
+      throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
+    }
+  }
+  /**
+   * @CREATE_CARD
    */
   async createCard(data: CreateCardDto): Promise<any> {
     try {
@@ -184,9 +314,7 @@ class BoardService {
     }
   }
   /**
-   * todo GET DETAIL BOARD
-   * @param id
-   * @returns
+   *@GET_DETAIL_BOARD
    */
   async getDetailBoard(id: string): Promise<any> {
     const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)

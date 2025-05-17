@@ -19,17 +19,21 @@ import LoaderUi from '@/components/shared/LoaderUi'
 import { Board, CardType, ColumnType } from '../types.board'
 import AddColumn from './form/AddColumn'
 
-import { useGetBoard, useUpdateBoard } from '@/services/query/board'
+import { useGetBoard, useMoveCardDifferentColumn, useUpdateBoard, useUpdateColumn } from '@/services/query/board'
 import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
 import { toast } from 'react-toastify'
 
 const BoardContent = () => {
-  const id = '67f78e83fabfe0894a3089e1'
+  const id = '681f387fdc886ca3acecb0f2'
   const { data: getBoard, isLoading, refetch } = useGetBoard(id)
 
   // const [] = useState()
 
   const { mutate } = useUpdateBoard()
+
+  const { mutate: updateColumn } = useUpdateColumn()
+
+  const { mutate: moveCardDifferentColumn } = useMoveCardDifferentColumn()
 
   const [boardData, setBoardData] = useState<Board | undefined>(undefined)
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -106,6 +110,8 @@ const BoardContent = () => {
 
   const handleCardDrag = (activeId: string, overId: string) => {
     if (!boardData) return
+
+    // ==== kiểm tra card mình đang kéo có phải thuộc col mình đang kéo hay ko
     const activeColumn = boardData.columns.find((col) => col.cards.some((card) => card._id === activeId))
 
     const overColumn = boardData.columns.find(
@@ -114,12 +120,10 @@ const BoardContent = () => {
 
     if (!activeColumn || !overColumn) return
 
-    // Find the card currently being drag
+    // tìm card hiện tại đang được kéo
     const activeCard = activeColumn.cards.find((card) => card._id === activeId)
 
     if (!activeCard) return
-
-    if (!activeColumn || !overColumn) return
 
     if (activeColumn._id === overColumn._id) {
       handleSameColumnDrag(activeColumn, activeId, overId)
@@ -135,6 +139,22 @@ const BoardContent = () => {
     if (oldIndex !== newIndex && oldIndex !== -1 && newIndex !== -1) {
       const newCardOrder = arrayMove(column.cardOrderIds, oldIndex, newIndex)
       const orderedCards = mapOrder(column.cards as any, newCardOrder, '_id')
+
+      // console.log(column, 'column')
+      const payload = {
+        id: column._id,
+        cardOrderIds: newCardOrder
+      }
+
+      updateColumn(payload, {
+        onSuccess: () => {
+          refetch()
+        },
+        onError: (error) => {
+          toast.error(`Error creating column, ${error}`)
+        }
+      })
+
       updateBoardData(column._id, newCardOrder, orderedCards as any)
     }
   }
@@ -146,25 +166,53 @@ const BoardContent = () => {
     overId: string
   ) => {
     if (!boardData) return
+
+    // 👉 Lấy dữ liệu chuẩn trước khi mutate
+    const currentCardId = activeId
+    const prevColumnId = activeColumn._id
+    const nextColumnId = overColumn._id
+    const prevCardOrderIds = activeColumn.cardOrderIds.filter((id) => id !== activeId)
+
+    const overIndex = overId === overColumn._id ? 0 : overColumn.cardOrderIds.indexOf(overId)
+
+    const nextCardOrderIds = [
+      ...overColumn.cardOrderIds.slice(0, overIndex),
+      activeId,
+      ...overColumn.cardOrderIds.slice(overIndex)
+    ]
+
+    const payload = {
+      currentCardId,
+      prevColumnId,
+      prevCardOrderIds,
+      nextColumnId,
+      nextCardOrderIds
+    }
+
+    moveCardDifferentColumn(payload, {
+      onSuccess: () => {
+        refetch()
+      },
+      onError: (error) => {
+        toast.error(`Error creating column, ${error}`)
+      }
+    })
+
     const newColumns = boardData.columns.map((col) => {
-      if (col._id === activeColumn._id) {
+      if (col._id === prevColumnId) {
         return {
           ...col,
-          cardOrderIds: col.cardOrderIds.filter((id) => id !== activeId),
+          cardOrderIds: prevCardOrderIds,
           cards: col.cards.filter((card) => card._id !== activeId)
         }
       }
-      if (col._id === overColumn._id) {
-        const newCard = { ...activeCard, columnId: overColumn._id }
-        const overIndex = overId === overColumn._id ? 0 : col.cardOrderIds.indexOf(overId)
-
-        const newCardOrder = [...col.cardOrderIds.slice(0, overIndex), activeId, ...col.cardOrderIds.slice(overIndex)]
-
-        const orderedCards = mapOrder([...(col.cards as any), newCard], newCardOrder, '_id')
+      if (col._id === nextColumnId) {
+        const newCard = { ...activeCard, columnId: nextColumnId }
+        const orderedCards = mapOrder([...(col.cards as any), newCard], nextCardOrderIds, '_id')
 
         return {
           ...col,
-          cardOrderIds: newCardOrder,
+          cardOrderIds: nextCardOrderIds,
           cards: orderedCards
         }
       }
@@ -180,6 +228,7 @@ const BoardContent = () => {
     const newColumns = boardData.columns.map((col) =>
       col._id === columnId ? { ...col, cardOrderIds: newCardOrder, cards: orderedCards } : col
     )
+
     setBoardData({ ...boardData, columns: newColumns })
   }
 

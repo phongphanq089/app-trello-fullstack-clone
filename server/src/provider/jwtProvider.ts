@@ -21,7 +21,7 @@ const generateToken = ({
   })
 }
 
-const verifyToken = ({ token, secretOrPrivateKey }: { token: string; secretOrPrivateKey: string }) => {
+const verifyToken = (token: string, secretOrPrivateKey: string) => {
   return new Promise<any>((resolve, reject) => {
     jwt.verify(token, secretOrPrivateKey, (error, decoded) => {
       if (error) {

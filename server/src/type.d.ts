@@ -11,3 +11,11 @@ declare module 'express' {
     decoded_forgot_password_token?: TokenPayload
   }
 }
+
+declare global {
+  namespace Express {
+    interface Request {
+      jwtDecoded?: any
+    }
+  }
+}

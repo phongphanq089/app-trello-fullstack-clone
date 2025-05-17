@@ -50,7 +50,8 @@ export class userSchema {
   public static forgotPassword = z.object({
     email: z.string().email({
       message: 'email invalid address'
-    })
+    }),
+    urlRedirect: z.string().url()
   })
   public static verifyForgotPassword = z.object({
     email: z.string().email({
@@ -67,7 +68,8 @@ export class userSchema {
   public static resendForgotPasswordToken = z.object({
     email: z.string().email({
       message: 'Please enter valid email address'
-    })
+    }),
+    urlRedirect: z.string().url()
   })
   public static resendVerifyEmailToken = z.object({
     email: z.string().email({

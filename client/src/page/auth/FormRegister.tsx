@@ -1,13 +1,15 @@
-import { GoogleIcon } from '@/components/shared/IconJSX'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { registerValidation, TypeRisterValidation } from '@/lib/validate'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Terminal } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRegisterUser } from '@/services/query/auth'
+import { toast } from 'react-toastify'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 const FormRegister = () => {
   const [isVisible, setIsVisible] = useState(false)
@@ -15,15 +17,27 @@ const FormRegister = () => {
   const {
     handleSubmit,
     register,
-    control,
-    watch,
+    reset,
     formState: { errors }
   } = useForm<TypeRisterValidation>({
     resolver: zodResolver(registerValidation)
   })
 
-  const onSubmit = async (value: TypeRisterValidation) => {
-    console.log(value, '94358790345')
+  const { mutate: registerUser, isPending } = useRegisterUser()
+
+  const [emailVeriry, setEmailVerify] = useState(false)
+
+  const [nameEmail, setNameEmail] = useState('')
+
+  const onSubmit = async (payload: TypeRisterValidation) => {
+    registerUser(payload, {
+      onSuccess: (data) => {
+        setEmailVerify(true)
+        setNameEmail(data.result.email)
+        toast.success('Register successfully')
+        reset()
+      }
+    })
   }
 
   return (
@@ -32,27 +46,17 @@ const FormRegister = () => {
         <h1 className='font-semibold text-3xl text-neutral-900 tracking-tighter text-center'>
           Trello App <br />
         </h1>
-        <p className='mt-4 font-medium text-base text-neutral-900 text-center px-8'>
-          A simple and easy way to copy paste components from the web.
-        </p>
 
-        <div className='mt-8'>
-          <Button
-            className='inline-flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-white px-5 py-3 font-medium duration-200 hover:bg-white/50 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 text-black'
-            type='button'
-          >
-            <GoogleIcon className='size-6' />
-            <span>Sign in with Google</span>
-          </Button>
-          <div className='relative py-3'>
-            <div className='relative flex justify-center'>
-              <span className='before:-translate-y-1/2 after:-translate-y-1/2 px-2 text-sm before:absolute before:top-1/2 before:left-0 before:h-px before:w-4/12 after:absolute after:top-1/2 after:right-0 after:h-px after:w-4/12 sm:after:bg-neutral-300 sm:before:bg-neutral-300 text-gray-800'>
-                Or continue with
-              </span>
-            </div>
-          </div>
-        </div>
-        {/* ===== FORM ACCTION SUBMIT =======*/}
+        {emailVeriry ? (
+          <Alert className='my-4 bg-yellow-300/40'>
+            <Terminal className='h-4 w-4' />
+            <AlertTitle>An email has been sent to {nameEmail}</AlertTitle>
+            <AlertDescription>Please check and verify your account before logging in!</AlertDescription>
+          </Alert>
+        ) : (
+          ''
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className='space-y-3'>
             <div>
@@ -111,7 +115,8 @@ const FormRegister = () => {
               {errors.confirmPwd && <p className='text-red-500 text-sm mt-1'>{errors.confirmPwd.message}</p>}
             </div>
             <div className='col-span-full '>
-              <Button type='submit' className='h-12 flex items-center justify-center w-full mt-5'>
+              <Button type='submit' className='h-12 flex items-center justify-center w-full mt-5' disabled={isPending}>
+                {isPending && <Loader2 className='animate-spin' />}
                 Sign Up
               </Button>
             </div>
@@ -119,13 +124,12 @@ const FormRegister = () => {
           <div className='mt-6'>
             <p className='mx-auto flex text-center font-medium text-black text-sm leading-tight'>
               Not have a password?
-              <Link to='/auth/register' className='ml-auto text-amber-800 hover:text-black'>
+              <Link to='/auth/login' className='ml-auto text-amber-800 hover:text-black'>
                 Sign up now
               </Link>
             </p>
           </div>
         </form>
-        {/* ===== END FORM ====== */}
       </div>
     </div>
   )

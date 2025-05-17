@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
 import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
-import { useCreateCard } from '@/services/query/board'
+import { useCreateCard, useRemoveColumn } from '@/services/query/board'
 
 interface PropsType {
   column: ColumnType
@@ -30,6 +30,8 @@ const Column: React.FC<PropsType> = ({ column, boardId, refetch }) => {
   }
 
   const { mutate } = useCreateCard()
+
+  const { mutate: removeColunm } = useRemoveColumn()
   const [isAddCardOpen, setIsAddCardOpen] = useState(false)
 
   const [value, setValue] = useState('')
@@ -58,6 +60,17 @@ const Column: React.FC<PropsType> = ({ column, boardId, refetch }) => {
     )
   }
 
+  const handleRemoveColumn = () => {
+    removeColunm(column._id, {
+      onSuccess: () => {
+        refetch && refetch()
+      },
+      onError: (error) => {
+        console.log(error)
+      }
+    })
+  }
+
   return (
     <SortableContext items={column.cardOrderIds} strategy={verticalListSortingStrategy}>
       <div
@@ -67,6 +80,7 @@ const Column: React.FC<PropsType> = ({ column, boardId, refetch }) => {
         {...listeners}
         className='p-4 bg-gray-100 w-[400px] rounded-md  relative overflow-hidden cursor-grab'
       >
+        <Button onClick={handleRemoveColumn}>Deleted</Button>
         <ColumnHeader title={column.title} />
         <ColumnBody cards={column.cards} cardOrderIds={column.cardOrderIds} />
         {isAddCardOpen ? (

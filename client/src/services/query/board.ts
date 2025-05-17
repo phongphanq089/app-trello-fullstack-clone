@@ -41,7 +41,7 @@ export const useCreateCard = () => {
 }
 
 const fetchUpdateBoard = async (payload: { title: string; description: string; columnOrderIds: string[] }) => {
-  const id = '67f78e83fabfe0894a3089e1'
+  const id = '681f387fdc886ca3acecb0f2'
   const response = await http.put(`/boards/updateBoard/${id}`, { ...payload })
 
   return response.data
@@ -52,3 +52,41 @@ export const useUpdateBoard = () => {
     mutationFn: (payload: { title: string; description: string; columnOrderIds: string[] }) => fetchUpdateBoard(payload)
   })
 }
+
+const fetchUpdateColumn = async (payload: { id: string; cardOrderIds: string[] }) => {
+  const response = await http.put(`/boards/updateColumn/${payload.id}`, { cardOrderIds: payload.cardOrderIds })
+
+  return response.data
+}
+
+export const useUpdateColumn = () => {
+  return useMutation({
+    mutationFn: (payload: { id: string; cardOrderIds: string[] }) => fetchUpdateColumn(payload)
+  })
+}
+
+const fetchRemoveColumn = async (id: string) => {
+  const response = await http.put(`/boards/removeColumn/${id}`, { columnId: id })
+
+  return response.data
+}
+
+export const useRemoveColumn = () => {
+  return useMutation({
+    mutationFn: (id: string) => fetchRemoveColumn(id)
+  })
+}
+
+const fetchMoveCardDifferentColumn = async (payload: any) => {
+  const response = await http.put(`/boards/moveCardDifferentColumn`, { ...payload })
+
+  return response.data
+}
+
+export const useMoveCardDifferentColumn = () => {
+  return useMutation({
+    mutationFn: (payload: { id: string; cardOrderIds: string[] }) => fetchMoveCardDifferentColumn(payload)
+  })
+}
+
+///moveCardDifferentColumn

@@ -30,6 +30,18 @@ export const loginValidation = z.object({
   password: fields.password
 })
 
+export const verifyForgotPassValidation = z.object({
+  password: fields.password
+})
+
+export const resendEmailValidation = z.object({
+  emailResend: fields.email
+})
+
 export type TypeRisterValidation = z.infer<typeof registerValidation>
 
 export type TypeLoginValidation = z.infer<typeof loginValidation>
+
+export type TypeResendEmail = z.infer<typeof resendEmailValidation>
+
+export type TypeVerifyForgotPassValidation = z.infer<typeof verifyForgotPassValidation>

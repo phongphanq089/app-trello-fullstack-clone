@@ -2,6 +2,7 @@ import express from 'express'
 import {
   forgotPaswordController,
   registerUserController,
+  resendEmailnController,
   resendForgotPasswordTokenController,
   userLoginController,
   userVerifyAccountController,
@@ -29,11 +30,16 @@ Router.post(
   validateRequest(userSchema.verifyForgotPassword),
   wrapRequestHandler(verifyForgotPasswordController)
 )
-
 Router.post(
   '/resend-forgot-password-token',
   validateRequest(userSchema.resendForgotPasswordToken),
   wrapRequestHandler(resendForgotPasswordTokenController)
+)
+
+Router.post(
+  '/resend-email',
+  validateRequest(userSchema.resendVerifyEmailToken),
+  wrapRequestHandler(resendEmailnController)
 )
 
 export const boardUser = Router
