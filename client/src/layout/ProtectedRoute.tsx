@@ -1,8 +1,9 @@
+import { useAppSelector } from '@/redux/store'
 import { Navigate, Outlet } from 'react-router-dom'
 
 const ProtectedRoute = () => {
-  const isAuthenticationUser = true
+  const { user } = useAppSelector((state) => state.auth)
 
-  return isAuthenticationUser ? <Outlet /> : <Navigate to='/auth/login' />
+  return user ? <Outlet /> : <Navigate to='/auth/login' />
 }
 export default ProtectedRoute

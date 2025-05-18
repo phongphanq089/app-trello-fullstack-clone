@@ -85,3 +85,25 @@ export const resendEmailnController = async (req: Request<any, any, ResendVerify
     messsage: result.message
   })
 }
+
+export const logoutController = async (req: Request<any, any, any>, res: Response) => {
+  res.clearCookie('accessToken')
+  res.clearCookie('refreshToken')
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    messsage: { LogOut: true }
+  })
+}
+
+export const refreshTokenController = async (req: Request<any, any, any>, res: Response) => {
+  const result = await userService.refreshToken(req.cookies?.refreshToken as string)
+
+  res.cookie('accessToken', result.accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: ms('14 days')
+  })
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: result
+  })
+}

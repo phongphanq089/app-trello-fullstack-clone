@@ -1,8 +1,9 @@
+import { useAppSelector } from '@/redux/store'
 import { Navigate, Outlet } from 'react-router-dom'
 
 const LayoutAuthProtected = () => {
-  const isAuthenticationUser = true
-  return <>{isAuthenticationUser ? <Navigate to='/' /> : <Outlet />}</>
+  const { user } = useAppSelector((state) => state.auth)
+  return <>{user ? <Navigate to='/' /> : <Outlet />}</>
 }
 
 export default LayoutAuthProtected

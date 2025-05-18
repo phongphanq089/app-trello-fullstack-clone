@@ -13,6 +13,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { logoutUser } from '@/redux/slice/authSlice'
+import { AppDispatch } from '@/redux/store'
 import {
   Cloud,
   CreditCard,
@@ -29,8 +31,14 @@ import {
   UserPlus,
   Users
 } from 'lucide-react'
+import { useDispatch } from 'react-redux'
 
 const UserMenu = () => {
+  const dispath = useDispatch<AppDispatch>()
+
+  const handleLogout = () => {
+    dispath(logoutUser(true))
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -113,7 +121,7 @@ const UserMenu = () => {
           <span>API</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut />
           <span>Log out</span>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

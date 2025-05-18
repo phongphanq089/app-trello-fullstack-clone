@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 
 const httpServer = createServer(app)
 
-// app.use(cookieParser())
+app.use(cookieParser())
 
 app.use(express.json()) // Middleware để parse body JSON
 app.use(express.urlencoded({ extended: true })) // Middleware để parse body từ form

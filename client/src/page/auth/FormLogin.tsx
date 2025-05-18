@@ -11,6 +11,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import ResendEmail from './components/ResendEmail'
+import { useDispatch } from 'react-redux'
+import { loginUser } from '@/redux/slice/authSlice'
+import { useAppSelector, type AppDispatch } from '@/redux/store'
 
 export default function FormLogin() {
   const {
@@ -22,14 +25,16 @@ export default function FormLogin() {
     resolver: zodResolver(loginValidation)
   })
   const [isVisible, setIsVisible] = useState(false)
-  const { mutate: loginUser } = useLoginUser()
+  // const { mutate: loginUser } = useLoginUser()
+  const dispath = useDispatch<AppDispatch>()
+
+  const { loading } = useAppSelector((state) => state.auth)
 
   const onSubmit = async (payload: TypeLoginValidation) => {
-    loginUser(payload, {
-      onSuccess: () => {
-        reset()
-      }
-    })
+    dispath(loginUser({ ...payload }))
+    if (!loading) {
+      reset()
+    }
   }
   return (
     <div className='relative z-10 flex flex-1 flex-col rounded-3xl border-white/50 border-t bg-white/60 px-4 py-10 backdrop-blur-2xl sm:justify-center md:flex-none md:px-20 lg:rounded-r-none lg:border-t-0 lg:border-l lg:py-24'>

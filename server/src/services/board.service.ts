@@ -107,7 +107,7 @@ class BoardService {
       }
 
       if (updateData.columnOrderIds) {
-        updateData.columnOrderIds = updateData.columnOrderIds.map((id: any) => ObjectId.createFromHexString(id)) as any
+        updateData.columnOrderIds = updateData.columnOrderIds.map((id: any) => new ObjectId(id)) as any
       }
 
       Object.keys(updateData).forEach((fieldName) => {
@@ -280,7 +280,7 @@ class BoardService {
 
       await colectionBoard.findOneAndUpdate(
         {
-          _id: ObjectId.createFromHexString(targetColumn.boardId)
+          _id: new ObjectId(targetColumn.boardId)
         },
         { $pull: { columnOrderIds: new ObjectId(targetColumn._id) } } as any,
         { returnDocument: 'after' }

@@ -1,6 +1,8 @@
 import express from 'express'
 import {
   forgotPaswordController,
+  logoutController,
+  refreshTokenController,
   registerUserController,
   resendEmailnController,
   resendForgotPasswordTokenController,
@@ -8,6 +10,7 @@ import {
   userVerifyAccountController,
   verifyForgotPasswordController
 } from '~/controllers/user.controller'
+import { authMiddlewares } from '~/middlewares/authMiddlewares'
 import { validateRequest, wrapRequestHandler } from '~/middlewares/wrapRequestHandler'
 import { userSchema } from '~/model/user.schema'
 
@@ -41,5 +44,9 @@ Router.post(
   validateRequest(userSchema.resendVerifyEmailToken),
   wrapRequestHandler(resendEmailnController)
 )
+
+Router.delete('/logout', wrapRequestHandler(logoutController))
+
+Router.get('/refeshToken', wrapRequestHandler(refreshTokenController))
 
 export const boardUser = Router

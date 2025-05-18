@@ -39,14 +39,14 @@ Router.post(
 
 Router.put(
   '/updateColumn/:id',
-  authMiddlewares,
+  // authMiddlewares,
   validateRequest(BoardSchema.updateColumn),
   wrapRequestHandler(updateColumnController)
 )
 
 Router.put(
   '/moveCardDifferentColumn',
-  authMiddlewares,
+  // authMiddlewares,
   validateRequest(BoardSchema.moveCardDifferentColumn),
   wrapRequestHandler(moveCardDifferentColumnController)
 )
@@ -55,7 +55,6 @@ Router.get('/getBoard/:id', authMiddlewares, wrapRequestHandler(getBoardDetailCo
 
 Router.put(
   '/removeColumn/:id',
-  authMiddlewares,
   validateRequest(BoardSchema.removeColumnSchema),
   wrapRequestHandler(removeColumnController)
 )

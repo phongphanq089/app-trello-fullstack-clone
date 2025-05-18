@@ -27,8 +27,6 @@ const BoardContent = () => {
   const id = '681f387fdc886ca3acecb0f2'
   const { data: getBoard, isLoading, refetch } = useGetBoard(id)
 
-  // const [] = useState()
-
   const { mutate } = useUpdateBoard()
 
   const { mutate: updateColumn } = useUpdateColumn()
@@ -167,7 +165,6 @@ const BoardContent = () => {
   ) => {
     if (!boardData) return
 
-    // 👉 Lấy dữ liệu chuẩn trước khi mutate
     const currentCardId = activeId
     const prevColumnId = activeColumn._id
     const nextColumnId = overColumn._id
@@ -261,12 +258,14 @@ const BoardContent = () => {
               const column = orderedColumns?.find((col) => col._id === columnId)
               const isLast = index === boardData.columnOrderIds.length - 1
               return (
-                column && (
-                  <React.Fragment key={column._id}>
-                    <Column key={column._id} column={column} boardId={id} refetch={refetch} />
-                    {isLast && <AddColumn boardId={id} refetch={refetch} />}
-                  </React.Fragment>
-                )
+                <>
+                  {column && (
+                    <React.Fragment key={column._id}>
+                      <Column key={column._id} column={column} boardId={id} refetch={refetch} />
+                      {isLast && <AddColumn boardId={id} refetch={refetch} />}
+                    </React.Fragment>
+                  )}
+                </>
               )
             })}
           </div>

@@ -1,61 +1,75 @@
 import axios, { AxiosInstance } from 'axios'
 import { toast } from 'react-toastify'
+import { logoutUser } from '@/redux/slice/authSlice'
+import { refreshTokenAPi } from './fetch/auth'
 
-class HttpConfig {
-  private axiosInstance: AxiosInstance
+let axiosReduxStore: any
+let refreshTokenPromise: Promise<string | undefined> | null = null
 
-  constructor(baseURL: string) {
-    this.axiosInstance = axios.create({
-      baseURL,
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      withCredentials: true
-    })
+export const injectStore = (_store: any) => {
+  axiosReduxStore = _store
+}
 
-    this.initializeResponseInterceptor()
-  }
+const createHttpInstance = (baseURL: string): AxiosInstance => {
+  const instance = axios.create({
+    baseURL,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    withCredentials: true
+  })
 
-  public getInstance(): AxiosInstance {
-    return this.axiosInstance
-  }
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config
 
-  private initializeResponseInterceptor(): void {
-    this.axiosInstance.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response) {
-          const status = error.response.status
-          const message = (error.response.data as any)?.message || 'An error occurred.'
+      if (error.response) {
+        const status = error.response.status
+        const message = (error.response.data as any)?.message || 'An error occurred.'
 
-          // Nếu lỗi 401 mà là do token hết hạn, xử lý riêng
-          if (status === 410) {
-            const errorMessage = message.toLowerCase()
-            if (errorMessage.includes('token') || errorMessage.includes('expired')) {
-              // Xử lý riêng token hết hạn: ví dụ tự logout hoặc redirect
-              console.warn('Token hết hạn, xử lý đăng xuất ở đây.')
-              // Ví dụ: logoutUser() hoặc redirect('/login')
-              return Promise.reject(error)
-            }
-            toast.error(message)
-          } else if ([400, 403, 422, 404, 409, 406].includes(status)) {
-            toast.error(message)
-          } else if (error.request) {
-            toast.error('Unable to connect to server.')
+        // Xử lý refresh token
+        if (status === 410 && !originalRequest._retry) {
+          originalRequest._retry = true
+
+          if (!refreshTokenPromise) {
+            refreshTokenPromise = refreshTokenAPi()
+              .then((data) => data?.accessToken)
+              .catch(() => {
+                axiosReduxStore.dispatch(logoutUser(false))
+              })
+              .finally(() => {
+                refreshTokenPromise = null
+              })
+          }
+
+          const newAccessToken = await refreshTokenPromise
+
+          if (newAccessToken) {
+            return instance(originalRequest)
           } else {
-            toast.error('An unknown error occurred.')
+            return Promise.reject(error)
           }
         }
 
-        // Handle error globally
-        return Promise.reject(error)
+        if (status === 401) {
+          axiosReduxStore.dispatch(logoutUser(false))
+        } else if ([400, 403, 422, 404, 409, 406].includes(status)) {
+          toast.error(message)
+        } else if (error.request) {
+          // toast.error('Unable to connect to server.')
+        } else {
+          toast.error('An unknown error occurred.')
+        }
       }
-    )
-  }
+
+      return Promise.reject(error)
+    }
+  )
+
+  return instance
 }
 
-const httpConfig = new HttpConfig(import.meta.env.VITE_API_BASE_URL)
-
-const http = httpConfig.getInstance()
+const http = createHttpInstance(import.meta.env.VITE_API_BASE_URL)
 
 export default http

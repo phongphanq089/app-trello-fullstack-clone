@@ -357,6 +357,35 @@ class UserService {
 
     return { message: USER_MESSAGES.RESEND_VERIFY_EMAIL_SUCCESS }
   }
+  /**
+   *@FREFESH_TOKEN
+   */
+  async refreshToken(clientRefreshToken: string) {
+    try {
+      // giải mã xem có hợp lệ hay ko
+      const refreshTokenDecoded = await jwtProvider.verifyToken(
+        clientRefreshToken,
+        ENV_SETTING.REFRESH_TOKEN_SECRET_SIGNATURE
+      )
+
+      const userInfo = {
+        _id: refreshTokenDecoded._id,
+        email: refreshTokenDecoded.email
+      }
+
+      const accessToken = await jwtProvider.generateToken({
+        payload: userInfo,
+        options: {
+          expiresIn: ENV_SETTING.ACCESS_TOKEN_LIFE
+        },
+        secretOrPrivateKey: ENV_SETTING.ACCESS_TOKEN_SECRET_SIGNATURE
+      })
+
+      return { accessToken }
+    } catch (error) {
+      throw new AppError('Please sign in! ( error from refresh token )', HTTTP_STATUS_CODE.CLIENT_ERROR.UNAUTHORIZED)
+    }
+  }
 }
 
 export const userService = new UserService()
