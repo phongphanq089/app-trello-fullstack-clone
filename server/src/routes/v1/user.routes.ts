@@ -11,6 +11,8 @@ import {
   verifyForgotPasswordController
 } from '~/controllers/user.controller'
 import { authMiddlewares } from '~/middlewares/authMiddlewares'
+import { multerUploadMiddleware } from '~/middlewares/multerUploadMiddleware'
+
 import { validateRequest, wrapRequestHandler } from '~/middlewares/wrapRequestHandler'
 import { userSchema } from '~/model/user.schema'
 
@@ -48,5 +50,12 @@ Router.post(
 Router.delete('/logout', wrapRequestHandler(logoutController))
 
 Router.get('/refeshToken', wrapRequestHandler(refreshTokenController))
+
+Router.put(
+  '/updateAccount',
+  authMiddlewares,
+  multerUploadMiddleware.upload.single,
+  wrapRequestHandler(refreshTokenController)
+)
 
 export const boardUser = Router

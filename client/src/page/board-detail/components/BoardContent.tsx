@@ -17,11 +17,11 @@ import Card from './card/Card'
 
 import LoaderUi from '@/components/shared/LoaderUi'
 import { Board, CardType, ColumnType } from '../types.board'
-import AddColumn from './form/AddColumn'
 
 import { useGetBoard, useMoveCardDifferentColumn, useUpdateBoard, useUpdateColumn } from '@/services/query/board'
 import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
 import { toast } from 'react-toastify'
+import AddColumnForm from './AddColumnForm'
 
 const BoardContent = () => {
   const id = '681f387fdc886ca3acecb0f2'
@@ -246,6 +246,8 @@ const BoardContent = () => {
 
   return (
     <div>
+      {boardData.columns.length === 0 && <AddColumnForm boardId={id} refetch={refetch} />}
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -257,22 +259,25 @@ const BoardContent = () => {
             {boardData?.columnOrderIds?.map((columnId: any, index) => {
               const column = orderedColumns?.find((col) => col._id === columnId)
               const isLast = index === boardData.columnOrderIds.length - 1
+
+              if (!column) return null
               return (
-                <>
+                <React.Fragment key={column._id}>
                   {column && (
-                    <React.Fragment key={column._id}>
+                    <>
                       <Column key={column._id} column={column} boardId={id} refetch={refetch} />
-                      {isLast && <AddColumn boardId={id} refetch={refetch} />}
-                    </React.Fragment>
+
+                      {isLast && <AddColumnForm boardId={id} refetch={refetch} />}
+                    </>
                   )}
-                </>
+                </React.Fragment>
               )
             })}
           </div>
         </SortableContext>
         <DragOverlay>
           {activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN ? (
-            <div className='opacity-80 bg-slate-400'>
+            <div className='opacity-80 bg-black overflow-hidden rounded-xl'>
               {orderedColumns?.find((col) => col._id === activeId) && (
                 <Column column={orderedColumns.find((col) => col._id === activeId)!} />
               )}

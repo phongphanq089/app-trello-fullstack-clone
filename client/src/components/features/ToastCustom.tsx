@@ -27,7 +27,7 @@ const ToastCustom = () => {
       toastClassName={(context) =>
         contextClass[context?.type || 'default'] +
         ' ' +
-        'relative flex pl-4 ml-[23px] pr-[35px] py-3 min-h-[55px] rounded-md justify-between items-center overflow-hidden cursor-pointer opacity-1 mb-2'
+        'relative flex pl-4 ml-[23px] pr-[35px] py-3 min-h-[55px] rounded-md justify-between items-center overflow-hidden cursor-pointer opacity-100 mb-2 z-50'
       }
     />
   )

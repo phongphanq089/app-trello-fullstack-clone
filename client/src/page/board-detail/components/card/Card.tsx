@@ -21,7 +21,7 @@ const Card: React.FC<CardProps> = ({ card, className }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-gray-50 p-3 rounded shadow-sm cursor-grab active:cursor-grabbing ${className || ''}`}
+      className={`p-3 border dark:border-gray-400 overflow-hidden !rounded-xl cursor-grab active:cursor-grabbing bg-gradient-to-r from-primary/20 to-primary/10  ${className || ''}`}
     >
       {card.cover && <img src={card.cover} alt='cover' className='w-full h-auto object-cover rounded mb-2' />}
       <div className='text-sm'>{card.title}</div>

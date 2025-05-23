@@ -8,7 +8,7 @@ interface ColumnHeaderProps {
 
 const ColumnHeader: React.FC<ColumnHeaderProps> = ({ title, attributes, listeners }) => {
   return (
-    <div {...attributes} {...listeners} className='font-bold mb-4 cursor-grab active:cursor-grabbing'>
+    <div {...attributes} {...listeners} className='font-bold  cursor-grab active:cursor-grabbing'>
       {title}
     </div>
   )
