@@ -27,6 +27,7 @@ import {
 import { SearchForm } from '../shared/SearchForm'
 import { TeamSwitcher } from '../shared/TeamSwitcher'
 import { Link } from 'react-router-dom'
+import { Image } from 'lucide-react'
 
 // This is sample data.
 const data = {
@@ -60,9 +61,9 @@ const data = {
           icon: RiBardLine
         },
         {
-          title: 'Contacts',
-          url: '#',
-          icon: RiUserFollowLine,
+          title: 'Gallery',
+          url: '/gallery',
+          icon: Image,
           isActive: true
         },
         {

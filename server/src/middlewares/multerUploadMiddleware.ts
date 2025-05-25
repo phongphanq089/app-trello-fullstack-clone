@@ -5,7 +5,6 @@ import { Request } from 'express'
 import { FileFilterCallback } from 'multer'
 
 const customFileFilter = (req: Request, file: Express.Multer.File, callback: FileFilterCallback) => {
-  console.log('upload avatar', file)
   if (!ALLOW_COMMOM_FILE_TYPES.includes(file.mimetype)) {
     const err = new Error('file type is invalid. Only accept jpg, jpeg ,png')
     return callback(err as any, false)
@@ -15,6 +14,7 @@ const customFileFilter = (req: Request, file: Express.Multer.File, callback: Fil
 }
 
 const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fieldSize: LIMIT_COMMON_FILE_SIZE },
   fileFilter: customFileFilter
 })

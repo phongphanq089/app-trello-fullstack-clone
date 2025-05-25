@@ -13,8 +13,19 @@ import {
 } from '~/model/board.schema'
 import { boardService } from '~/services/board.service'
 
+export const getBoardController = async (req: Request<any, any, any>, res: Response) => {
+  const userId = req.jwtDecoded._id
+  const { page, itemsPerpage } = req.query
+  const board = await boardService.getBoard(userId, page as string, itemsPerpage as string)
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: BOARD_MESSAGES.CREATE_BOARD_SUCCESS,
+    result: board
+  })
+}
+
 export const createBoardController = async (req: Request<any, any, CreateBoardDto>, res: Response) => {
-  const board = await boardService.createBoard(req.body)
+  const userId = req.jwtDecoded._id
+  const board = await boardService.createBoard(userId, req.body)
   return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
     message: BOARD_MESSAGES.CREATE_BOARD_SUCCESS,
     result: board
@@ -80,11 +91,13 @@ export const getBoardDetailController = async (req: Request, res: Response) => {
 
   const resBoard = cloneDeep(board)
 
-  resBoard.columns.forEach((column: any) => {
-    column.cards = resBoard.cards.filter((card: any) => card.columnId.toString() === column._id.toString())
-  })
+  if (resBoard) {
+    resBoard.columns.forEach((column: any) => {
+      column.cards = resBoard.cards.filter((card: any) => card.columnId.toString() === column._id.toString())
+    })
 
-  delete resBoard.cards
+    delete resBoard.cards
+  }
 
   return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
     message: BOARD_MESSAGES.GET_BOARD_DETAIL_SUCCESS,

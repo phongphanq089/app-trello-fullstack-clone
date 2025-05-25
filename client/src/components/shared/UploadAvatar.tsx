@@ -1,18 +1,35 @@
 'use client'
 
 import { CircleUserRoundIcon, XIcon } from 'lucide-react'
-
 import { useFileUpload } from '@/hooks/use-file-upload'
 import { Button } from '@/components/ui/button'
+import { useAppSelector } from '@/redux/store'
+import { useEffect } from 'react'
 
-export default function UploadAvatar() {
+interface PropsType {
+  setAvatar: React.Dispatch<React.SetStateAction<null | any>>
+}
+
+export default function UploadAvatar({ setAvatar }: PropsType) {
   const [{ files }, { removeFile, openFileDialog, getInputProps }] = useFileUpload({
     accept: 'image/*'
   })
 
+  const user = useAppSelector((state) => state.auth.user)
+
   const previewUrl = files[0]?.preview || null
   const fileName = files[0]?.file.name || null
-  console.log(files)
+
+  const uploadFile = files[0]?.file || null
+
+  const displayImage = previewUrl || user?.avatar || null
+
+  useEffect(() => {
+    if (uploadFile) {
+      setAvatar(uploadFile)
+    }
+  }, [uploadFile])
+
   return (
     <div className='flex flex-col items-center gap-2'>
       <div className='relative inline-flex'>
@@ -22,10 +39,10 @@ export default function UploadAvatar() {
           onClick={openFileDialog}
           aria-label={previewUrl ? 'Change image' : 'Upload image'}
         >
-          {previewUrl ? (
+          {displayImage ? (
             <img
               className='size-full object-cover'
-              src={previewUrl}
+              src={displayImage}
               alt='Preview of uploaded image'
               width={64}
               height={64}

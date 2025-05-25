@@ -107,3 +107,27 @@ export const refreshTokenController = async (req: Request<any, any, any>, res: R
     message: result
   })
 }
+
+export const updateAccountProfileController = async (req: Request<any, any, any>, res: Response) => {
+  const userId = req.jwtDecoded._id
+
+  const fileBuffer = req?.file?.buffer || null
+
+  const result = await userService.updateUserAccount(userId, fileBuffer, req.body)
+
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: 'Update Profile succeess !',
+    result: result
+  })
+}
+
+export const updateChangePasswordController = async (req: Request<any, any, any>, res: Response) => {
+  const userId = req.jwtDecoded._id
+
+  const result = await userService.updatePassword(userId, req.body)
+
+  return res.status(HTTTP_STATUS_CODE.SUCCESS.OK).json({
+    message: 'Update password succeess !',
+    result: result
+  })
+}

@@ -13,6 +13,8 @@ export class BoardSchema {
     columnOrderIds: z.array(z.string().regex(OBJECT_ID_RULE, { message: OBJECT_ID_RULE_MESSAGE })).default([]),
     createdAt: z.number().default(() => Date.now()),
     updatedAt: z.number().nullable().default(null),
+    ownerIds: z.array(z.string().regex(OBJECT_ID_RULE, { message: OBJECT_ID_RULE_MESSAGE })).default([]),
+    memberIds: z.array(z.string().regex(OBJECT_ID_RULE, { message: OBJECT_ID_RULE_MESSAGE })).default([]),
     _destroy: z.boolean().default(false)
   })
 

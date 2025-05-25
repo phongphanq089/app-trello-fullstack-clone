@@ -7,6 +7,8 @@ import {
   ForgotPasswordSchema,
   ResendForgotPasswordToken,
   ResendVerifyEmailToken,
+  UpdateChangePassword,
+  UpdateUserAccount,
   UserLoginSchema,
   UserRegistrationSchema,
   UserVerifyAccountSchema,
@@ -18,6 +20,7 @@ import { pickUser } from '~/utils/lib'
 import { BrevoProvider } from '~/provider/brevoProvider'
 import { jwtProvider } from '~/provider/jwtProvider'
 import { USER_MESSAGES } from '~/constants/messages'
+import { uploadImageKitProvider } from '~/provider/uploadImageKitProvider'
 
 class UserService {
   private getColection(name: string): Collection {
@@ -29,6 +32,14 @@ class UserService {
   private async checkExitEmail(email: string) {
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
     const isExitEmail = await colection.findOne({ email })
+    return isExitEmail
+  }
+  /**
+   *@CHECK_USER
+   */
+  private async checkExitUser(id: string) {
+    const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
+    const isExitEmail = await colection.findOne({ _id: new ObjectId(id) })
     return isExitEmail
   }
   /**
@@ -63,14 +74,7 @@ class UserService {
   /**
    *@UPDATE_USER
    */
-  async updateUser(
-    id: string,
-    data: {
-      isActive?: boolean
-      verifyToken?: null | string
-      forgot_password_token?: null | string
-    }
-  ): Promise<any> {
+  async updateUser(id: string, data: any) {
     const INVALID_UPDATE_FIELDS = ['_id', 'createdAt']
 
     const colection = this.getColection(ENV_SETTING.USER_COLLECTION_NAME)
@@ -384,6 +388,81 @@ class UserService {
       return { accessToken }
     } catch (error) {
       throw new AppError('Please sign in! ( error from refresh token )', HTTTP_STATUS_CODE.CLIENT_ERROR.UNAUTHORIZED)
+    }
+  }
+  /**
+   *@UPDATE_USER_ACCOUNT
+   */
+  async updateUserAccount(idUser: string, fileBuffer: Buffer | null, infoUser: UpdateUserAccount) {
+    try {
+      const existUser = await this.checkExitUser(idUser)
+      if (!existUser) {
+        throw new AppError('Account not found', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
+      }
+      if (!existUser.isActive) {
+        throw new AppError(
+          'Please check and verify your account before logging in!',
+          HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE
+        )
+      }
+
+      let updateProfileSetting = {} as any
+
+      if (fileBuffer) {
+        const nameProfile = `profile-${Date.now()}`
+        const uploadImageProfile = await uploadImageKitProvider.streamUpload(
+          fileBuffer,
+          nameProfile,
+          '/trello-app-clone'
+        )
+        updateProfileSetting = await this.updateUser(idUser, { avatar: uploadImageProfile.url })
+      } else {
+        console.log({
+          username: infoUser.username,
+          displayName: infoUser.displayName
+        })
+        updateProfileSetting = await this.updateUser(idUser, {
+          username: infoUser.username,
+          displayName: infoUser.displayName
+        })
+      }
+
+      return pickUser(updateProfileSetting)
+    } catch (error) {
+      throw new AppError('Update user error', HTTTP_STATUS_CODE.CLIENT_ERROR.BAD_REQUEST)
+    }
+  }
+  /**
+   *@UPDATE_PASSWORD
+   */
+  async updatePassword(idUser: string, infoUser: UpdateChangePassword) {
+    try {
+      const existUser = await this.checkExitUser(idUser)
+      if (!existUser) {
+        throw new AppError('Account not found', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_FOUND)
+      }
+      if (!existUser.isActive) {
+        throw new AppError(
+          'Please check and verify your account before logging in!',
+          HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE
+        )
+      }
+
+      let updateChangePassword = {} as any
+
+      if (infoUser.current_password && infoUser.current_password) {
+        if (!bcrypt.compareSync(infoUser.new_password, existUser.password)) {
+          console.log('sadsjal;kd')
+          return new AppError('Your Current Password is incorrect!', HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE)
+        }
+        updateChangePassword = await this.updateUser(idUser, {
+          password: bcrypt.hashSync(infoUser.new_password, 8)
+        })
+
+        return pickUser(updateChangePassword)
+      }
+    } catch (error) {
+      throw new AppError('Update user error', HTTTP_STATUS_CODE.CLIENT_ERROR.BAD_REQUEST)
     }
   }
 }

@@ -6,6 +6,8 @@ import {
   registerUserController,
   resendEmailnController,
   resendForgotPasswordTokenController,
+  updateAccountProfileController,
+  updateChangePasswordController,
   userLoginController,
   userVerifyAccountController,
   verifyForgotPasswordController
@@ -54,8 +56,16 @@ Router.get('/refeshToken', wrapRequestHandler(refreshTokenController))
 Router.put(
   '/updateAccount',
   authMiddlewares,
-  multerUploadMiddleware.upload.single,
-  wrapRequestHandler(refreshTokenController)
+  multerUploadMiddleware.upload.single('profileImage'),
+  validateRequest(userSchema.updateUserAccount),
+  wrapRequestHandler(updateAccountProfileController)
+)
+
+Router.put(
+  '/update-password',
+  authMiddlewares,
+  validateRequest(userSchema.updateChangePassword),
+  wrapRequestHandler(updateChangePasswordController)
 )
 
 export const boardUser = Router

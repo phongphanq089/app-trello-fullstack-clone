@@ -5,6 +5,7 @@ import {
   createBoardController,
   createCardController,
   createColumnController,
+  getBoardController,
   getBoardDetailController,
   moveCardDifferentColumnController,
   removeColumnController,
@@ -15,6 +16,8 @@ import { BoardSchema } from '~/model/board.schema'
 import { authMiddlewares } from '~/middlewares/authMiddlewares'
 
 const Router = express.Router()
+
+Router.post('/board-list', authMiddlewares, wrapRequestHandler(getBoardController))
 
 Router.post(
   '/createBoard',

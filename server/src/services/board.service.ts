@@ -1,5 +1,5 @@
-import { STATUS_CODES } from 'http'
 import { Collection, ObjectId } from 'mongodb'
+import { title } from 'process'
 import ENV_SETTING from '~/config/envSetting'
 import databaseService from '~/config/mongoDb'
 import HTTTP_STATUS_CODE from '~/constants/HttpStatusCodes'
@@ -12,7 +12,7 @@ import {
   UpdateBoard,
   UpdateColumn
 } from '~/model/board.schema'
-import { generateSlug } from '~/utils/lib'
+import { generateSlug, pagingSkipValue } from '~/utils/lib'
 
 class BoardService {
   getColection(name: string): Collection {
@@ -78,9 +78,9 @@ class BoardService {
   /**
    *@CREATE_BOARD
    */
-  async createBoard(data: CreateBoardDto) {
+  async createBoard(userId: string, data: CreateBoardDto) {
     try {
-      const newBoard = { slug: generateSlug(data.title), ...data }
+      const newBoard = { slug: generateSlug(data.title), ...data, ownerIds: [new ObjectId(userId)] }
 
       const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
 
@@ -93,6 +93,66 @@ class BoardService {
       throw new AppError(error, HTTTP_STATUS_CODE.SERVER_ERROR.INTERNAL_SERVER_ERROR)
     }
   }
+  /**
+   *@GET_BOARD
+   */
+  async getBoard(userId: string, page: string, itemsPerpage: string) {
+    const DEFAULT_PAGE = '1'
+    const DEFAULT_ITEM_PER_PAGE = '12'
+
+    const colection = this.getColection(ENV_SETTING.BOARD_COLLECTION_NAME)
+
+    try {
+      if (!page) page = DEFAULT_PAGE
+
+      if (!itemsPerpage) itemsPerpage = DEFAULT_ITEM_PER_PAGE
+
+      const queryConditions = [
+        // điều kiện 1 :board chưa bị xoá
+        { _destroy: false },
+        // điều kiện 2 : userId đang thực hiện request này nó phải thuộc vào 1 trong 2 cái mảng ownerIds hoặc memberId , sử dụng toán tử $all của mongoDB
+        {
+          $or: [{ ownerIds: { $all: [new ObjectId(userId)] } }, { memberIds: { $all: [new ObjectId(userId)] } }]
+        }
+      ]
+
+      const query = colection.aggregate(
+        [
+          { $match: { $and: queryConditions } },
+          // sort mặt định của board theo A-Z ( mặt định sẽ bị chữ B hoa đứng trước chữ a thường (theo chuẩn mã ASCII ))
+
+          { $sort: { title: 1 } },
+          //sử lý nhiều luồng trong 1 query
+          {
+            $facet: {
+              // luồng 01  : query boards
+              queryBoards: [
+                { $skip: pagingSkipValue(parseInt(page, 10), parseInt(itemsPerpage, 10)) }, // bỏ qua số lượng bản ghi của những trang trước đó
+                { $limit: parseInt(itemsPerpage, 10) } // giới hạn tối đa số lượng bản ghi trả về trong 1 page
+              ],
+              // luồng 02 : query đếm tổng tất cả số lượng  bản ghi trong db và trả về
+              queryTotalBoards: [{ $count: 'countedAllBoards' }]
+            }
+          }
+        ],
+        { collation: { locale: 'en' } }
+      )
+
+      console.log(query.toArray(), '44444')
+
+      const results = await query.toArray()
+
+      const res = results[0]
+
+      return {
+        boards: res.queryBoards || [],
+        totalBoards: res.queryTotalBoards[0]?.countedAllBoards || 0
+      }
+    } catch (error) {
+      throw new AppError(error, HTTTP_STATUS_CODE.CLIENT_ERROR.BAD_REQUEST)
+    }
+  }
+
   /**
    *@UPDATE_BOARD
    */
@@ -324,7 +384,7 @@ class BoardService {
           {
             $match: {
               _id: new ObjectId(id),
-              _destroy: true
+              _destroy: false
             }
           },
           {

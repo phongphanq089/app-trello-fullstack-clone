@@ -19,6 +19,13 @@ const createHttpInstance = (baseURL: string): AxiosInstance => {
     withCredentials: true
   })
 
+  instance.interceptors.request.use((config) => {
+    if (config.data instanceof FormData && config.headers && 'Content-Type' in config.headers) {
+      delete config.headers['Content-Type']
+    }
+    return config
+  })
+
   instance.interceptors.response.use(
     (response) => response,
     async (error) => {

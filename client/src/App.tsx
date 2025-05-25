@@ -7,6 +7,8 @@ import ForgotPasswordPage from './page/auth/ForgotPasswordPage'
 import VerifyForgotPassword from './page/auth/VerifyForgotPassword'
 import BoardPage from './page/board-detail/BoardPage'
 import { PageAccountSetting } from './page/account-setting/PageAccountSetting'
+import PageListBoard from './page/list-board/PageListBoard'
+import PageGallery from './page/gallery/PageGallery'
 
 function App() {
   return (
@@ -20,9 +22,11 @@ function App() {
       </Route>
 
       <Route path='/' element={<ProtectedRoute />}>
-        <Route path='' element={<Navigate to={'boards/67f78e83fabfe0894a3089e1'} replace={true} />} />
+        <Route path='' element={<Navigate to={'list-board'} replace={true} />} />
         <Route path='boards/:boardId' element={<BoardPage />} />
         <Route path='/account-setting' element={<PageAccountSetting />} />
+        <Route path='/list-board' element={<PageListBoard />} />
+        <Route path='/gallery' element={<PageGallery />} />
       </Route>
 
       <Route path='*' element={<div>Page not found</div>} />

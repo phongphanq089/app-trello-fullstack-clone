@@ -1,18 +1,19 @@
 import { useMutation } from '@tanstack/react-query'
-import http from '../http'
-import { TypeLoginValidation, TypeRisterValidation } from '@/lib/validate'
+import {
+  fetchForgotPassword,
+  fetchForgotPasswordVerify,
+  fetchLoginUser,
+  fetchRegisterUser,
+  fetchResendEmail,
+  fetchResendForgotPasswordVerify,
+  fetchVerifyUser,
+  updateAccount,
+  updatePassword
+} from '../fetch/auth'
 
 /**
- *
- * @PAYLOAD { email: string;  password: string; }
- * @returns
+ *LOGIN_USER
  */
-const fetchLoginUser = async (PAYLOAD: TypeLoginValidation) => {
-  const response = await http.post('/users/login', { ...PAYLOAD })
-
-  return response.data
-}
-
 export const useLoginUser = () =>
   useMutation({
     mutationFn: fetchLoginUser,
@@ -25,21 +26,8 @@ export const useLoginUser = () =>
   })
 
 /**
- *
- * @PAYLOAD  {
-    email: string;
-    password: string;
-    confirmPwd: string;
-    username?: string | undefined;
-}
- * @returns
+ * @REGISTER_USER
  */
-const fetchRegisterUser = async (PAYLOAD: TypeRisterValidation) => {
-  const response = await http.post('/users/register', { ...PAYLOAD })
-
-  return response.data
-}
-
 export const useRegisterUser = () =>
   useMutation({
     mutationFn: fetchRegisterUser,
@@ -54,10 +42,6 @@ export const useRegisterUser = () =>
 /**
  *@VERIFY_ACCOUNT
  */
-const fetchVerifyUser = async (PAYLOAD: { email: string; token: string }) => {
-  const response = await http.put('/users/verify', { ...PAYLOAD })
-  return response.data
-}
 
 export const useVerifyUser = () =>
   useMutation({
@@ -73,10 +57,6 @@ export const useVerifyUser = () =>
 /**
  *@RESEND_EMAIL
  */
-const fetchResendEmail = async (emailResend: string) => {
-  const response = await http.post('/users/resend-email', { email: emailResend })
-  return response.data
-}
 
 export const useResendEmail = () =>
   useMutation({
@@ -92,12 +72,6 @@ export const useResendEmail = () =>
 /**
  *@FORGOT_PASSWORD
  */
-const fetchForgotPassword = async (email: string) => {
-  const url = 'http://localhost:8015/auth/verify-forgot-password'
-  const response = await http.post('/users/forgot-pasword', { email: email, urlRedirect: url })
-  return response.data
-}
-
 export const useForgotPassword = () =>
   useMutation({
     mutationFn: fetchForgotPassword,
@@ -112,16 +86,6 @@ export const useForgotPassword = () =>
 /**
  *@FORGOT_PASSWORD_VERIFY
  */
-
-interface ForgotPasswordVerifyType {
-  email: string
-  token: string
-  password: string
-}
-const fetchForgotPasswordVerify = async (PAYLOAD: ForgotPasswordVerifyType) => {
-  const response = await http.post('/users/verify-forgot-password', { ...PAYLOAD })
-  return response.data
-}
 
 export const useForgotPasswordVerify = () =>
   useMutation({
@@ -138,12 +102,6 @@ export const useForgotPasswordVerify = () =>
  *@RESEND_FORGOT_PASSWORD_VERIFY
  */
 
-const fetchResendForgotPasswordVerify = async (email: string) => {
-  const url = 'http://localhost:8015/auth/verify-forgot-password'
-  const response = await http.post('/users/resend-forgot-password-token', { email: email, urlRedirect: url })
-  return response.data
-}
-
 export const useResendForgotPasswordVerify = () =>
   useMutation({
     mutationFn: fetchResendForgotPasswordVerify,
@@ -152,5 +110,33 @@ export const useResendForgotPasswordVerify = () =>
     },
     onError: (error) => {
       console.error('❌ Resend password failed:', error)
+    }
+  })
+
+/**
+ *@UPDATE_ACCOUNT
+ */
+export const useUpdateUser = () =>
+  useMutation({
+    mutationFn: updateAccount,
+    onSuccess: (data) => {
+      console.log('✅ Update user success:', data)
+    },
+    onError: (error) => {
+      console.error('❌ Update user failed:', error)
+    }
+  })
+
+/**
+ * @UPDATE_PASSWORD
+ */
+export const useUpdatePassword = () =>
+  useMutation({
+    mutationFn: updatePassword,
+    onSuccess: (data) => {
+      console.log('✅ Update password success:', data)
+    },
+    onError: (error) => {
+      console.error('❌ Update password failed:', error)
     }
   })

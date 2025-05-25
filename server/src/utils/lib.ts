@@ -27,3 +27,10 @@ export const pickUser = (user: any) => {
     'updatedAt'
   ])
 }
+
+export const pagingSkipValue = (page: number, itemsPerpage: number) => {
+  if (!page || !itemsPerpage) return 0
+  if (page <= 0 || itemsPerpage <= 0) return 0
+
+  return (page - 1) * itemsPerpage
+}

@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMutation } from '@tanstack/react-query'
 import {
+  fetchAddNewBoard,
   fetchBoard,
-  fetchCreateBoard,
   fetchCreateCard,
+  fetchCreateColumn,
+  fetchGetBoard,
   fetchMoveCardDifferentColumn,
   fetchRemoveColumn,
   fetchUpdateBoard,
@@ -18,9 +20,23 @@ export const useGetBoard = (boardId: string) => {
   })
 }
 
+export const useGetListBoard = (page: number, itemsPerPage: number) => {
+  return useQuery({
+    queryKey: ['board', page, itemsPerPage],
+    queryFn: () => fetchGetBoard(String(page), String(itemsPerPage)),
+    staleTime: 1000 * 60 * 5
+  })
+}
+
+export const useAddNewBoard = () => {
+  return useMutation({
+    mutationFn: (payload: { title: string; description: string }) => fetchAddNewBoard(payload)
+  })
+}
+
 export const useCreateBoard = () => {
   return useMutation({
-    mutationFn: (payload: { title: string; boardId: string }) => fetchCreateBoard(payload)
+    mutationFn: (payload: { title: string; boardId: string }) => fetchCreateColumn(payload)
   })
 }
 
@@ -30,9 +46,10 @@ export const useCreateCard = () => {
   })
 }
 
-export const useUpdateBoard = () => {
+export const useUpdateBoard = (boardId: string) => {
   return useMutation({
-    mutationFn: (payload: { title: string; description: string; columnOrderIds: string[] }) => fetchUpdateBoard(payload)
+    mutationFn: (payload: { title: string; description: string; columnOrderIds: string[] }) =>
+      fetchUpdateBoard(boardId, payload)
   })
 }
 

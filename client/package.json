@@ -12,6 +12,7 @@
     "prettier:fix": "prettier --write \"src/**/(*.tsx|*.ts|*.css|*.scss)\""
   },
   "dependencies": {
+    "@ctrl/tinycolor": "^4.1.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@hookform/resolvers": "^3.9.1",
@@ -38,6 +39,7 @@
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
     "next-themes": "^0.4.3",
+    "randomcolor": "^0.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.2",
@@ -54,6 +56,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@types/node": "^22.14.0",
+    "@types/randomcolor": "^0.5.9",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@types/redux-persist": "^4.0.0",

@@ -76,6 +76,24 @@ export class userSchema {
       message: 'Please enter valid email address'
     })
   })
+  public static updateUserAccount = z.object({
+    username: z.string().min(3).optional(),
+    displayName: z.string().min(3).optional()
+  })
+  public static updateChangePassword = z.object({
+    current_password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .refine((password) => /[0-9!@#$%^&*(),.?":{}|<>]/.test(password), {
+        message: 'Password must include at least one number or special character'
+      }),
+    new_password: z
+      .string()
+      .min(8, { message: 'Password must be at least 8 characters long' })
+      .refine((password) => /[0-9!@#$%^&*(),.?":{}|<>]/.test(password), {
+        message: 'Password must include at least one number or special character'
+      })
+  })
 }
 
 export type UserRegistrationSchema = z.infer<typeof userSchema.userRegistrationSchema>
@@ -91,3 +109,7 @@ export type VerifyForgotPassword = z.infer<typeof userSchema.verifyForgotPasswor
 export type ResendForgotPasswordToken = z.infer<typeof userSchema.resendForgotPasswordToken>
 
 export type ResendVerifyEmailToken = z.infer<typeof userSchema.resendVerifyEmailToken>
+
+export type UpdateUserAccount = z.infer<typeof userSchema.updateUserAccount>
+
+export type UpdateChangePassword = z.infer<typeof userSchema.updateChangePassword>

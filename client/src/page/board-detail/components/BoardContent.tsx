@@ -22,12 +22,16 @@ import { useGetBoard, useMoveCardDifferentColumn, useUpdateBoard, useUpdateColum
 import { ACTIVE_DRAG_ITEM_TYPE } from '@/contants/setting'
 import { toast } from 'react-toastify'
 import AddColumnForm from './AddColumnForm'
+import { useParams } from 'react-router-dom'
 
 const BoardContent = () => {
-  const id = '681f387fdc886ca3acecb0f2'
-  const { data: getBoard, isLoading, refetch } = useGetBoard(id)
+  const { boardId } = useParams()
 
-  const { mutate } = useUpdateBoard()
+  if (!boardId) return
+
+  const { data: getBoard, isLoading, refetch } = useGetBoard(boardId)
+
+  const { mutate } = useUpdateBoard(boardId)
 
   const { mutate: updateColumn } = useUpdateColumn()
 
@@ -246,7 +250,7 @@ const BoardContent = () => {
 
   return (
     <div>
-      {boardData.columns.length === 0 && <AddColumnForm boardId={id} refetch={refetch} />}
+      {boardData.columns.length === 0 && <AddColumnForm boardId={boardId} refetch={refetch} />}
 
       <DndContext
         sensors={sensors}
@@ -265,9 +269,9 @@ const BoardContent = () => {
                 <React.Fragment key={column._id}>
                   {column && (
                     <>
-                      <Column key={column._id} column={column} boardId={id} refetch={refetch} />
+                      <Column key={column._id} column={column} boardId={boardId} refetch={refetch} />
 
-                      {isLast && <AddColumnForm boardId={id} refetch={refetch} />}
+                      {isLast && <AddColumnForm boardId={boardId} refetch={refetch} />}
                     </>
                   )}
                 </React.Fragment>

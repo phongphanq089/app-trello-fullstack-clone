@@ -1,57 +1,53 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { useCreateBoard } from '@/services/query/board'
+import { useAddNewBoard } from '@/services/query/board'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
-import { Columns3, Grid2x2Plus, Plus } from 'lucide-react'
+import { Columns3, Plus } from 'lucide-react'
 import { useState } from 'react'
-
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { z } from 'zod'
 
-interface AddColumnFormProps {
-  boardId: string
+interface PropType {
   refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<any, Error>>
 }
 
-const AddColumnForm = ({ boardId, refetch }: AddColumnFormProps) => {
+const AddBoard = ({ refetch }: PropType) => {
   const [open, setOpen] = useState(false)
 
   const verifyForgotPassValidation = z.object({
-    title: z.string().min(3, { message: 'Title must be at least 3 characters long' })
+    title: z.string().min(3, { message: 'Title must be at least 3 characters long' }),
+    description: z.string().min(5, { message: 'Description must be at least 5 characters long' })
   })
   const {
     handleSubmit,
     register,
+    reset,
     formState: { errors }
   } = useForm<z.infer<typeof verifyForgotPassValidation>>({
     resolver: zodResolver(verifyForgotPassValidation)
   })
 
-  const { mutate } = useCreateBoard()
+  const { mutate } = useAddNewBoard()
   const onSubmit = (payload: z.infer<typeof verifyForgotPassValidation>) => {
-    mutate(
-      { title: payload.title, boardId: boardId },
-      {
-        onSuccess: () => {
-          refetch()
-          toast.success('Column created successfully')
-          setOpen(false)
-        },
-        onError: (error) => {
-          toast.error(`Error creating column, ${error}`)
-        }
+    mutate(payload, {
+      onSuccess: () => {
+        toast.success('Add new board successfull')
+        refetch()
+        setOpen(false)
+        reset()
       }
-    )
+    })
   }
+
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button variant='outline' className='bg-primary hover:bg-primary/80 text-white hover:text-white/80'>
-          ADD NEW COLUMN
-          <Grid2x2Plus />
+        <Button className='bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium flex items-center text-sm'>
+          ADD NEW BOARD
+          <Plus className='w-5 h-5 mr-2' />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -69,7 +65,7 @@ const AddColumnForm = ({ boardId, refetch }: AddColumnFormProps) => {
             </svg>
           </div>
           <DialogHeader>
-            <DialogTitle className='sm:text-center'>ADD NEW COLUMN</DialogTitle>
+            <DialogTitle className='sm:text-center'>ADD NEW BOARD</DialogTitle>
           </DialogHeader>
         </div>
 
@@ -79,17 +75,30 @@ const AddColumnForm = ({ boardId, refetch }: AddColumnFormProps) => {
               <Input
                 id='dialog-subscribe'
                 className='peer ps-9'
-                placeholder='ADD NEW COLUMN'
+                placeholder='title'
                 type='text'
-                aria-label='Email'
                 {...register('title')}
               />
 
               <div className='text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50'>
                 <Columns3 size={16} aria-hidden='true' />
               </div>
+              {errors.title && <p className='text-red-500 text-sm mt-1'>{errors.title.message}</p>}
             </div>
-            {errors.title && <p className='text-red-500 text-sm mt-1'>{errors.title.message}</p>}
+            <div className='relative'>
+              <Input
+                id='dialog-subscribe'
+                className='peer ps-9'
+                placeholder='description'
+                type='text'
+                {...register('description')}
+              />
+
+              <div className='text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50'>
+                <Columns3 size={16} aria-hidden='true' />
+              </div>
+              {errors.description && <p className='text-red-500 text-sm mt-1'>{errors.description.message}</p>}
+            </div>
           </div>
           <Button type='submit' className='w-full py-6'>
             ADD
@@ -101,4 +110,4 @@ const AddColumnForm = ({ boardId, refetch }: AddColumnFormProps) => {
   )
 }
 
-export default AddColumnForm
+export default AddBoard

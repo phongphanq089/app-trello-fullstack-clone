@@ -1,5 +1,5 @@
 import http from '@/services/http'
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { toast } from 'react-toastify'
 
 interface User {
@@ -52,7 +52,6 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (showSuccess
   if (showSuccessMessage) {
     toast.success('Logout successFully !')
   }
-
   return response.data
 })
 
@@ -64,6 +63,14 @@ const authSlice = createSlice({
       state.user = null
       state.error = null
       state.loading = false
+    },
+    updateProfile(state, action: PayloadAction<Partial<User>>) {
+      if (state.user) {
+        state.user = {
+          ...state.user,
+          ...action.payload
+        }
+      }
     }
   },
   extraReducers: (builder) => {
@@ -86,6 +93,6 @@ const authSlice = createSlice({
   }
 })
 
-export const { logout } = authSlice.actions
+export const { logout, updateProfile } = authSlice.actions
 
 export const authSliceReducer = authSlice.reducer

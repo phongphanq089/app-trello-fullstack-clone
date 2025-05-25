@@ -23,7 +23,9 @@ const Card: React.FC<CardProps> = ({ card, className }) => {
       {...listeners}
       className={`p-3 border dark:border-gray-400 overflow-hidden !rounded-xl cursor-grab active:cursor-grabbing bg-gradient-to-r from-primary/20 to-primary/10  ${className || ''}`}
     >
-      {card.cover && <img src={card.cover} alt='cover' className='w-full h-auto object-cover rounded mb-2' />}
+      {card.cover && (
+        <img src={card.cover} alt='cover' className='w-full h-auto object-cover rounded overflow-hidden mb-2' />
+      )}
       <div className='text-sm'>{card.title}</div>
       {card.description && <div className='text-xs text-gray-600 mt-1'>{card.description}</div>}
     </div>
