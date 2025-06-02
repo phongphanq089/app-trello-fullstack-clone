@@ -147,3 +147,16 @@
     background-image: linear-gradient(225deg, #ff3cac 0%, #784ba0 50%, #4f46e5 100%);
   }
 }
+
+.my-masonry-grid {
+  display: flex;
+  margin-left: -16px; /* gap giữa cột */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 16px; /* gap giữa cột */
+  background-clip: padding-box;
+}
+.my-masonry-grid_column > div {
+  margin-bottom: 16px; /* khoảng cách dọc giữa items */
+}

@@ -3,6 +3,7 @@ import { boardRoute } from './board.routes'
 
 import { boardUser } from './user.routes'
 import HTTTP_STATUS_CODE from '~/constants/HttpStatusCodes'
+import { gallery } from './gallery.route'
 const Router = express.Router()
 
 Router.get('/status', (req, res) =>
@@ -18,5 +19,10 @@ Router.use('/boards', boardRoute)
  * todo USERS ROUTE API
  */
 Router.use('/users', boardUser)
+
+/**
+ *@GALLERY_IMAGE
+ */
+Router.use('/media', gallery)
 
 export const API_V1 = Router

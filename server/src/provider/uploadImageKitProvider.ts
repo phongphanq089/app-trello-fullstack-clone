@@ -38,4 +38,17 @@ const streamUpload = async (
   return result
 }
 
-export const uploadImageKitProvider = { streamUpload }
+const deleteFileGalleryItem = async (fileId: string) => {
+  return await imagekit.deleteFile(fileId)
+}
+const deleteFolderItem = async (folder: string) => {
+  return await imagekit.deleteFolder(folder)
+}
+
+const getListFolder = async (folder: string) => {
+  return await imagekit.listFiles({
+    path: `gallery/${folder}`
+  })
+}
+
+export const uploadImageKitProvider = { streamUpload, deleteFileGalleryItem, deleteFolderItem, getListFolder }

@@ -34,3 +34,10 @@ export const pagingSkipValue = (page: number, itemsPerpage: number) => {
 
   return (page - 1) * itemsPerpage
 }
+
+export const getTypeFolder = (mimetype: string) => {
+  if (mimetype.startsWith('image/')) return 'images'
+  if (mimetype.startsWith('audio/')) return 'audios'
+  if (mimetype.startsWith('video/')) return 'videos'
+  return 'others'
+}

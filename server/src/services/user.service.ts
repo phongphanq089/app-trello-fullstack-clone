@@ -401,7 +401,7 @@ class UserService {
       }
       if (!existUser.isActive) {
         throw new AppError(
-          'Please check and verify your account before logging in!',
+          'Please check and verify your account before update profile!',
           HTTTP_STATUS_CODE.CLIENT_ERROR.NOT_ACCEPTABLE
         )
       }

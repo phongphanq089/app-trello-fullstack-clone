@@ -1,7 +1,7 @@
 import { useGetListBoard } from '@/services/query/board'
 
 import AddBoard from './components/AddBoard'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import randomColor from 'randomcolor'
